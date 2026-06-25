@@ -1,0 +1,590 @@
+# AIGC Web SPEC
+
+Status: Draft
+Last updated: 2026-06-25
+
+## 1. Overview
+
+AIGC Web is a web-first AIGC content creation platform. The first product surface is a website, with future expansion reserved for mini program, Android, and iOS apps.
+
+The product is not a generic prompt box. Its core value is template-driven creation: platform-built templates package frontend inputs, prompts, model workflows, pricing, validation, rendering, fallback, and audit behavior. Users only choose a template, upload images or select saved assets, add simple descriptions/options, and generate complete videos.
+
+Primary users are ecommerce sellers, ecommerce operators, and product marketing users.
+
+Primary MVP template categories:
+
+- Product image to ecommerce short video.
+- Portrait photo to portrait/fashion transformation video.
+
+Initial user-facing website navigation:
+
+- `首页`: public website homepage for product positioning, primary use cases, registration bonus entry, template browsing, and entry into the logged-in workspace.
+- `工作台`: logged-in production center for quick start, making videos, active task status, credit state, recent assets, recommended templates, and traceability/risk reminders.
+- `模板`: template discovery, search, filtering, preview, and entry into template-based creation.
+- `任务`: task list, progress, completion/failure/refund status, and task traceability.
+- `我的`: account-adjacent space for assets, credits, and personal records.
+
+The homepage and workbench are separate surfaces. The homepage is the public product entry. The workbench is the logged-in production center. Template details can still open in a modal for preview, but serious creation should move into the workbench's `制作视频` state, not stay trapped inside a modal.
+
+Page layout principle:
+
+- Each page layout must match the page role.
+- Public pages can use stronger brand and conversion presentation.
+- Logged-in operational pages should be denser, quieter, and action-oriented.
+- Discovery pages should prioritize scanning and comparison.
+- Creation inputs are template-defined. Selling-point text is not globally required.
+- The first completed MVP template should be an image-only template: the user uploads/selects one image and can generate without writing text.
+- Creation states should prioritize the required input for the selected template and the generation action. Advanced settings should be output parameters such as ratio, duration, resolution, and clarity. Template switching, text fields, and multi-product controls should stay secondary unless that template requires them.
+- MVP creation pages should avoid a permanent right-side parameter/checklist panel. Parameters should appear inline, collapsed, or contextually when needed so PC width is used for batch production.
+- Tracking pages should prioritize state, progress, traceability, and recovery actions.
+- Account/asset pages should prioritize ownership, retention, credits, and reuse.
+
+Frontend prototype demonstration requirements:
+
+- Login/register surfaces can be simulated, but must show QR login, third-party login, signup bonus, and account entry points.
+- Recharge can be simulated, but package selection, payment action, balance change, and ledger change must be visible.
+- Video generation can be simulated, but required input validation, product selection, credit pre-freeze, task creation, task progress, task success, task failure/refund, and asset-library entry must be visible.
+- Task details must expose traceability context in user-facing language and reserve room for submitted parameters, template version, provider attempts, render attempts, and credit transactions.
+- Asset library must expose media type and retention/expiry context because provider-returned resources may expire.
+
+## 2. Goals
+
+- Let users generate complete videos without writing prompts.
+- Make templates the core product asset.
+- Support high-flexibility Agent-authored templates.
+- Provide a polished, premium frontend experience.
+- Support login, credits, recharge, signup bonus, activity rewards, and credit settlement.
+- Make every generation task traceable down to inputs, template version, pricing, provider attempts, render attempts, credit transactions, and errors.
+- Support direct AI generation and post-production workflows.
+- Avoid provider lock-in through adapters.
+- Use an Agent-first development and operations model.
+- Start with web while keeping future mini program/native app support possible.
+
+## 3. Non-Goals
+
+Not in MVP:
+
+- Native apps or mini program.
+- Public freeform model studio.
+- Team workspace UI.
+- Full project management.
+- Full brand kit editor.
+- Drag-and-drop template editor.
+- Public template marketplace.
+- Advanced recommendation engine.
+- Subscription plans.
+- Public share links.
+- Direct social publishing.
+- Full internationalization.
+- Advanced fraud/risk scoring.
+
+## 4. Target Users
+
+Primary:
+
+- Ecommerce sellers.
+- Ecommerce operators.
+- Product marketers.
+
+Secondary/future:
+
+- Portrait/fashion creators.
+- Social media content creators.
+- Agencies and ecommerce teams.
+- Advanced users using a future Model Studio.
+
+## 5. Core Product Model
+
+### Template-Driven Creation
+
+Templates are versioned product assets. A template can define:
+
+- Metadata and publication status.
+- User inputs.
+- Frontend layout hints.
+- Validation rules.
+- Pricing rules.
+- Prompt composition.
+- Model/provider workflow.
+- Video composition/rendering rules.
+- Fallback behavior.
+- Moderation.
+- Audit coverage.
+- Test fixtures.
+
+See [template-config-design.md](./template-config-design.md).
+
+### Agent-First Development
+
+Humans describe product intent. Agents generate or modify code/config, run validations/tests, create previews, summarize changes, and prepare publish actions. Humans approve high-risk or externally visible changes.
+
+There are three separate Agent meanings:
+
+- Development Agent: modifies repository code/config/templates and runs validation.
+- Internal operations Agent: assists admins with diagnosis, summaries, proposals, and analysis.
+- User-facing Agent: a future product feature where end users chat with an assistant.
+
+This applies to:
+
+- Template creation.
+- Provider adapter changes.
+- Pricing changes.
+- Admin diagnostics.
+- Support investigations.
+- Release summaries.
+
+MVP requires Agent-driven development and Agent-ready operations. It does not require a public user-facing chat Agent or a fully autonomous internal operations Agent. The first implementation can use structured records and deterministic diagnosis summaries while keeping the system ready for deeper Agent automation.
+
+See [agent-operating-model.md](./agent-operating-model.md).
+
+## 6. User Experience
+
+MVP user path:
+
+1. User visits website.
+2. User sees ecommerce video creation as the main value.
+3. User browses templates.
+4. User selects ecommerce or portrait/fashion template.
+5. User uploads assets or selects from asset library.
+6. MVP first template only requires one image. Optional text appears only when a specific template requires it.
+7. User sees estimated credit cost.
+8. User logs in if needed.
+9. User submits generation.
+10. User tracks task status.
+11. User previews, downloads, and saves output.
+
+Frontend quality is mandatory. Motion/card interactions should be explored through prototypes before final visual selection.
+
+Frontend complexity should be reduced through lightweight pages plus overlays:
+
+- Template cards open a template detail modal.
+- Template use routes into the workbench's `制作视频` state, not a cramped drawer or modal.
+- `制作视频` defaults to image-only generation. Advanced settings are output parameters such as ratio, video length, image resolution, and clarity; they are not template switching, style writing, or required prompt fields.
+- Task detail opens a task drawer.
+- Filters use popovers or bottom sheets.
+- Credit/recharge actions use modals.
+- Media previews use lightboxes.
+
+See:
+
+- [mainstream-design-research-and-ui-proposal.md](./mainstream-design-research-and-ui-proposal.md)
+- [frontend-ux-direction.md](./frontend-ux-direction.md)
+- [motion-prototype-plan.md](./motion-prototype-plan.md)
+- [frontend-overlay-interaction-spec.md](./frontend-overlay-interaction-spec.md)
+
+## 7. MVP Scope
+
+### In Scope
+
+User-facing:
+
+- Home page.
+- Template gallery.
+- Creation workspace for two template categories.
+- Login-gated submit.
+- Credit balance.
+- Task center / generation history.
+- Asset upload and user-managed asset library.
+- Completed video preview.
+- Signed download.
+- Save output to asset library.
+- Basic in-app notifications.
+
+Backend:
+
+- API-first backend.
+- Template registry.
+- Credit ledger.
+- Generation task lifecycle.
+- Queue/worker.
+- Mock provider.
+- Asset storage.
+- Audit/task logs.
+
+Admin/Agent:
+
+- Task traceability.
+- Credit ledger lookup.
+- Template version list.
+- Provider attempt records.
+- Deterministic diagnosis summary from structured records.
+
+See [mvp-boundary-and-backlog.md](./mvp-boundary-and-backlog.md).
+
+### First Templates
+
+Ecommerce product short video:
+
+- Product main image.
+- Optional detail images.
+- Product selling points.
+- Target platform.
+- Style.
+- Duration.
+- Aspect ratio.
+
+Portrait/fashion transformation:
+
+- Portrait image.
+- Desired style/outfit direction.
+- Optional gender/style preference.
+- Duration.
+- Aspect ratio.
+- Explicit portrait consent.
+
+## 8. Credits and Pricing
+
+Users must log in before consuming credits.
+
+Credit sources:
+
+- Signup bonus.
+- Campaign/activity rewards.
+- Recharge purchase.
+- Admin grant.
+- Refund/adjustment.
+
+Credit lifecycle for generation:
+
+1. Estimate credits.
+2. Freeze credits when task is accepted.
+3. Settle credits when task succeeds.
+4. Release credits when task fails, times out, or is blocked before generation.
+
+Rules:
+
+- Fixed and dynamic template pricing are supported.
+- Pricing version and breakdown must be stored per task.
+- Free outputs have watermarks.
+- Signup bonus and campaign reward outputs are watermarked.
+- Paid-credit final outputs can be no-watermark depending on final package policy.
+- Preview/draft outputs can remain watermarked.
+- Provider/render/storage costs are tracked separately from user credit price.
+
+See:
+
+- [auth-credit-payment-strategy.md](./auth-credit-payment-strategy.md)
+- [pricing-plan-watermark-strategy.md](./pricing-plan-watermark-strategy.md)
+- [draft-preview-hd-strategy.md](./draft-preview-hd-strategy.md)
+
+## 9. Auth and Accounts
+
+One platform user can bind multiple login identities:
+
+- Email.
+- Phone.
+- QR scan login.
+- WeChat.
+- Google.
+- Apple.
+- Future OAuth providers.
+
+Credits, recharge orders, generation tasks, and assets belong to the platform user/workspace, not to an individual login identity.
+
+Signup bonus is granted once per platform user and must use an idempotency key.
+
+Anti-bonus-farming requires multiple risk signals, not IP limits alone.
+
+## 10. Tasks and Generation
+
+Every generation submission creates a `GenerationTask`.
+
+Task records store:
+
+- User.
+- Template and template version.
+- `creationMode`: template or freeform.
+- `outputMode`: preview or final.
+- Submitted inputs.
+- Submitted assets.
+- Pricing breakdown.
+- Credits frozen/settled.
+- Provider attempts.
+- Render attempts.
+- Output assets.
+- Error state.
+- Watermark state.
+
+Task events are append-only and record state transitions.
+
+User-visible states:
+
+- Waiting.
+- Generating.
+- Succeeded.
+- Failed.
+- Timed out.
+- Blocked.
+- Refunded.
+
+See:
+
+- [data-model-direction.md](./data-model-direction.md)
+- [project-draft-history-strategy.md](./project-draft-history-strategy.md)
+
+## 11. Video Composition and Rendering
+
+Not every template is a single model call. Supported workflow types:
+
+- Direct AI output.
+- AI generation plus editing/post-production.
+- Pure composition.
+- Multi-step hybrid workflows.
+
+The platform owns an intermediate `VideoCompositionSpec` for timeline/composition workflows. Renderer adapters execute it through Remotion, FFmpeg, cloud render APIs, or future renderers.
+
+Recommended MVP direction:
+
+- Direct provider output for simple templates.
+- Remotion + FFmpeg for structured ecommerce composition.
+- Jianying/CapCut only as optional adapter after official stable API/business access is confirmed.
+
+See [video-composition-rendering-strategy.md](./video-composition-rendering-strategy.md).
+
+## 12. AI Provider Strategy
+
+Templates request capabilities, not provider APIs.
+
+Capability examples:
+
+- Text to video.
+- Image to video.
+- Draft/preview video generation.
+- Video editing.
+- Subject/reference video.
+- Image generation/editing.
+- Upscaling.
+- Voice/music/captions.
+- Moderation.
+
+Provider differences are isolated in adapters. API keys and secrets use secret references and never appear in templates, frontend code, task records, or logs.
+
+MVP rollout:
+
+1. Adapter layer and mock provider.
+2. One primary real provider plus one fallback/aggregator if needed.
+3. Capability-based routing after metrics exist.
+
+See [ai-provider-strategy.md](./ai-provider-strategy.md).
+
+## 13. Assets and Storage
+
+Each user has an asset library.
+
+The asset library is user-managed, not only a passive system output list. Users must be able to manage their own reusable uploads and generated outputs.
+
+Assets include:
+
+- User uploads.
+- Generated videos.
+- Posters.
+- Intermediate files.
+- Provider raw outputs.
+- Template previews.
+- Render logs.
+
+Rules:
+
+- Use S3-compatible object storage.
+- Every file has an `Asset` record.
+- Private user assets use signed URLs.
+- Provider temporary URLs must be downloaded and persisted before expiry.
+- Generated outputs can be saved to asset library.
+- Users can upload, preview, download, rename, delete/archive, and reuse library assets in new generation tasks.
+- Users can filter assets by media type and retention/expiry state.
+- Deletion/takedown disables access and records audit metadata.
+- Deleting or archiving a library item must not break historical task traceability; task records keep metadata and asset references needed for audit.
+
+See [asset-storage-lifecycle-strategy.md](./asset-storage-lifecycle-strategy.md).
+
+## 14. Admin and Agent Operations
+
+Admin is an Agent-ready operations surface, not a heavy manual configuration tool.
+
+MVP admin/Agent capabilities:
+
+- Task search/detail.
+- Task timeline.
+- Credit ledger lookup.
+- Provider attempt lookup.
+- Template version list.
+- Deterministic diagnosis summaries from structured records.
+- Manual credit adjustment proposal and approval.
+
+High-risk Agent actions require human approval:
+
+- Template publish.
+- Provider routing changes.
+- Credit adjustments.
+- Payment/provider settings.
+- Large campaigns.
+
+See [admin-console-direction.md](./admin-console-direction.md).
+
+## 15. Compliance, Security, and Abuse
+
+Required MVP controls:
+
+- Upload rights confirmation.
+- Portrait consent.
+- Prohibited content policy.
+- Pre-generation moderation placeholder or integration.
+- Task-linked consent and moderation records.
+- No user asset training without explicit separate consent.
+- Secret management and log redaction.
+- Rate limits for registration, login, upload, generation, payment order creation, campaign claims.
+- Anti-bonus-farming trust gate.
+- Audit logs for credit and template operations.
+
+See:
+
+- [content-compliance-rights-strategy.md](./content-compliance-rights-strategy.md)
+- [security-abuse-strategy.md](./security-abuse-strategy.md)
+
+## 16. Notifications and Support
+
+MVP notifications:
+
+- In-app notification center.
+- Task completion/failure/refund.
+- Recharge status if payment enabled.
+- Campaign reward.
+- Admin approval-required alerts.
+
+Support:
+
+- Task detail has report-issue action.
+- Agent creates diagnosis summary from task, credit, provider, render, payment, and audit records.
+- Automatic refunds are rule-based.
+- Manual/goodwill credits require reason and approval.
+
+See:
+
+- [notification-strategy.md](./notification-strategy.md)
+- [support-dispute-refund-strategy.md](./support-dispute-refund-strategy.md)
+
+## 17. Analytics and Observability
+
+Product analytics should track:
+
+- Template discovery.
+- Creation funnel.
+- Login interruption.
+- Credit/recharge funnel.
+- Draft preview funnel.
+- Campaign funnel.
+- Result download/save.
+
+Operational observability should track:
+
+- Generation success/failure/timeout.
+- Provider latency/error/cost.
+- Render success/duration.
+- Credit freeze/settle/release.
+- Payment webhook status.
+- Signup/campaign abuse.
+- Queue health.
+
+See:
+
+- [product-analytics-growth-strategy.md](./product-analytics-growth-strategy.md)
+- [observability-slo-strategy.md](./observability-slo-strategy.md)
+
+## 18. Technical Stack
+
+Decision:
+
+- TypeScript-first.
+- React + Vite frontend.
+- NestJS backend.
+- PostgreSQL + Prisma.
+- Redis + BullMQ.
+- S3-compatible object storage.
+- Remotion + FFmpeg rendering.
+- Zod validation.
+- Vitest + Playwright testing.
+- Pino + OpenTelemetry + Sentry.
+- Docker-first deployment.
+- Monorepo when backend work starts.
+
+See [technical-stack-decision.md](./technical-stack-decision.md).
+
+## 19. Testing and Release
+
+Required quality gates:
+
+- Type check.
+- Lint.
+- Template schema validation.
+- Credit idempotency tests.
+- Task lifecycle tests.
+- Provider adapter contract tests.
+- Render adapter contract tests.
+- Frontend E2E smoke.
+- Log redaction tests.
+
+Release model:
+
+- Local, staging, production environments.
+- Template validation/publish flow.
+- Code CI gates.
+- Staging smoke tests.
+- Human approval for production/high-risk changes.
+- Rollback strategy for code, templates, provider routing, and campaigns.
+
+See:
+
+- [testing-quality-strategy.md](./testing-quality-strategy.md)
+- [deployment-release-strategy.md](./deployment-release-strategy.md)
+
+## 20. Future Reserved Capabilities
+
+Reserved but not MVP:
+
+- Team/workspace sharing.
+- Public freeform Model Studio.
+- Public user-facing Agent.
+- Subscriptions.
+- Advanced brand kit editor.
+- Public share links.
+- Direct social publishing.
+- Native apps and mini program.
+- Internationalization.
+
+See:
+
+- [team-permission-strategy.md](./team-permission-strategy.md)
+- [freeform-creation-strategy.md](./freeform-creation-strategy.md)
+- [multi-platform-adaptation-strategy.md](./multi-platform-adaptation-strategy.md)
+
+## 21. Open Decisions Before Product-Grade MVP
+
+These do not block frontend prototype work, but block production MVP:
+
+- First launch region and primary UI language.
+- First production login method.
+- Whether MVP payment is real or admin/test credits only.
+- First payment provider if real payment is enabled.
+- Signup bonus amount and abuse-control threshold.
+- First recharge packages and prices.
+- Whether recharge package bonus credits are paid-equivalent or promotional.
+- Whether all paid-credit final outputs remove watermark automatically or only selected packages/templates.
+- First real video provider for ecommerce product video.
+- First real video provider for portrait/fashion transformation, if different.
+- Initial object storage provider and CDN direction.
+- Exact media retention durations for uploads, final outputs, intermediates, provider raw outputs, and render logs.
+- Which frontend motion prototype is selected.
+- Whether public freeform mode stays internal-only after MVP or becomes a paid/pro feature.
+
+## 22. Implementation Start Recommendation
+
+Start implementation with:
+
+1. Frontend prototype pack.
+2. Selected visual direction.
+3. Web app skeleton with mock data.
+4. Monorepo/backend foundation.
+5. Template schema and two initial templates.
+6. Mock generation loop with real credit/task lifecycle.
+
+Do not start with real provider/payment integration until the mock task-credit-asset loop is verified.
