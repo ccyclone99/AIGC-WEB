@@ -13,6 +13,7 @@ This directory contains the current product, architecture, and implementation pl
 ## Product and UX
 
 - [frontend-ux-direction.md](./frontend-ux-direction.md): user-facing website and page structure.
+- [frontend-polish-spec.md](./frontend-polish-spec.md): next frontend-only visual, interaction, and responsive polish pass.
 - [mainstream-design-research-and-ui-proposal.md](./mainstream-design-research-and-ui-proposal.md): mainstream competitor research and complete UI proposal.
 - [motion-prototype-plan.md](./motion-prototype-plan.md): card flip, hover preview, bento, before/after, and transition prototypes.
 - [frontend-prototype-review.md](./frontend-prototype-review.md): implemented prototype pack and review criteria.
@@ -38,7 +39,10 @@ This directory contains the current product, architecture, and implementation pl
 - [technical-stack-decision.md](./technical-stack-decision.md): chosen TypeScript-first stack.
 - [system-architecture-direction.md](./system-architecture-direction.md): API, workers, modules, data stores, provider adapters.
 - [data-model-direction.md](./data-model-direction.md): core entities and relationships.
+- [backend-interface-prep.md](./backend-interface-prep.md): frontend-to-backend interface prep and readiness gate.
+- [backend-api-contract.md](./backend-api-contract.md): backend API endpoint and DTO contract drafted from the frontend state.
 - [template-config-design.md](./template-config-design.md): generic TemplateConfig structure.
+- [template-config-contract.md](./template-config-contract.md): frontend-approved MVP template contract used by the current prototype.
 - [video-composition-rendering-strategy.md](./video-composition-rendering-strategy.md): VideoCompositionSpec, Remotion, FFmpeg, renderer adapters.
 - [ai-provider-strategy.md](./ai-provider-strategy.md): provider capability routing, adapters, API keys, candidates.
 - [asset-storage-lifecycle-strategy.md](./asset-storage-lifecycle-strategy.md): asset library, storage, provider output persistence, retention.
@@ -56,9 +60,10 @@ This directory contains the current product, architecture, and implementation pl
 
 ## Recommended First Build Path
 
-1. Build the frontend prototype pack from [motion-prototype-plan.md](./motion-prototype-plan.md).
-2. Select/merge visual direction.
-3. Build the web app skeleton and mock user flow.
-4. Convert to monorepo and add backend foundation.
-5. Implement template schema, credit ledger, generation task lifecycle, mock provider, and asset storage.
-6. Add real provider and payment integrations after the mock task-credit-asset loop is verified.
+1. Use [frontend-polish-spec.md](./frontend-polish-spec.md) for the next frontend-only polish pass.
+2. Improve homepage, template gallery, creation workspace, task detail, asset library, and motion system.
+3. Re-run desktop/mobile prototype review after the frontend feels premium enough.
+4. Split the frontend prototype into stable type, data, domain, page, and component boundaries.
+5. Use [backend-interface-prep.md](./backend-interface-prep.md) and [backend-api-contract.md](./backend-api-contract.md) as the gate before adding backend foundation.
+6. Implement template schema, credit ledger, generation task lifecycle, mock provider, and asset storage.
+7. Add real provider and payment integrations after the mock task-credit-asset loop is verified.

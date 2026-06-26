@@ -1,7 +1,7 @@
 # AIGC Web SPEC
 
 Status: Draft
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 ## 1. Overview
 
@@ -22,7 +22,7 @@ Initial user-facing website navigation:
 - `工作台`: logged-in production center for quick start, making videos, active task status, credit state, recent assets, recommended templates, and traceability/risk reminders.
 - `模板`: template discovery, search, filtering, preview, and entry into template-based creation.
 - `任务`: task list, progress, completion/failure/refund status, and task traceability.
-- `我的`: account-adjacent space for assets, credits, and personal records.
+- `我的`: account-adjacent space split into `资产`, `积分`, and `账号` tabs for asset management, credit recharge/ledger, login/register, and personal records.
 
 The homepage and workbench are separate surfaces. The homepage is the public product entry. The workbench is the logged-in production center. Template details can still open in a modal for preview, but serious creation should move into the workbench's `制作视频` state, not stay trapped inside a modal.
 
@@ -35,14 +35,23 @@ Page layout principle:
 - Creation inputs are template-defined. Selling-point text is not globally required.
 - The first completed MVP template should be an image-only template: the user uploads/selects one image and can generate without writing text.
 - Creation states should prioritize the required input for the selected template and the generation action. Advanced settings should be output parameters such as ratio, duration, resolution, and clarity. Template switching, text fields, and multi-product controls should stay secondary unless that template requires them.
+- Image replacement should open an asset-library picker rather than switch templates inside the creation surface. The picker should prioritize existing user assets, keep upload as the first grid item, show selected state, and clearly mark preview-only assets that cannot be used by the current template.
+- Submitting a generation task should not force navigation to `任务`. The task enters the background, credits are frozen, a toast confirms submission, and the creation surface remains available for the next image/template.
+- If the same image, template, and output parameters already have an active background task, the creation surface should show a processing state instead of allowing accidental duplicate submission. Users can change the image or output settings to create a new variant.
+- Each generation submit must carry an idempotency key derived from the submitted template version, input asset, and output settings or an equivalent server-issued submit token.
 - MVP creation pages should avoid a permanent right-side parameter/checklist panel. Parameters should appear inline, collapsed, or contextually when needed so PC width is used for batch production.
 - Tracking pages should prioritize state, progress, traceability, and recovery actions.
+- Task detail must expose structured traceability before backend integration: submitted parameter snapshot, template/pricing version, credit ledger state, provider attempts, render/post-production records, moderation/fallback state, and output asset state.
+- Task failure state must distinguish failure stage, reason, error code, retryability, user-facing message, and whether frozen credits were released.
 - Account/asset pages should prioritize ownership, retention, credits, and reuse.
 
 Frontend prototype demonstration requirements:
 
 - Login/register surfaces can be simulated, but must show QR login, third-party login, signup bonus, and account entry points.
-- Recharge can be simulated, but package selection, payment action, balance change, and ledger change must be visible.
+- QR login must distinguish waiting, scanned, confirmed, expired, and rejected states.
+- Recharge can be simulated, but package selection, payment order creation, pending/paid/failed/expired states, balance change, and ledger change must be visible.
+- Payment order cancellation must be represented before backend integration.
+- Upload states must include success, validation failure, user cancellation, retry/reselect, and server-side rejection.
 - Video generation can be simulated, but required input validation, product selection, credit pre-freeze, task creation, task progress, task success, task failure/refund, and asset-library entry must be visible.
 - Task details must expose traceability context in user-facing language and reserve room for submitted parameters, template version, provider attempts, render attempts, and credit transactions.
 - Asset library must expose media type and retention/expiry context because provider-returned resources may expire.
@@ -160,6 +169,7 @@ Frontend complexity should be reduced through lightweight pages plus overlays:
 - Template cards open a template detail modal.
 - Template use routes into the workbench's `制作视频` state, not a cramped drawer or modal.
 - `制作视频` defaults to image-only generation. Advanced settings are output parameters such as ratio, video length, image resolution, and clarity; they are not template switching, style writing, or required prompt fields.
+- Template configuration must follow the frontend-approved contract for inputs, output settings, capabilities, pricing version, settlement, and trace fields.
 - Task detail opens a task drawer.
 - Filters use popovers or bottom sheets.
 - Credit/recharge actions use modals.
@@ -167,10 +177,12 @@ Frontend complexity should be reduced through lightweight pages plus overlays:
 
 See:
 
+- [frontend-polish-spec.md](./frontend-polish-spec.md)
 - [mainstream-design-research-and-ui-proposal.md](./mainstream-design-research-and-ui-proposal.md)
 - [frontend-ux-direction.md](./frontend-ux-direction.md)
 - [motion-prototype-plan.md](./motion-prototype-plan.md)
 - [frontend-overlay-interaction-spec.md](./frontend-overlay-interaction-spec.md)
+- [template-config-contract.md](./template-config-contract.md)
 
 ## 7. MVP Scope
 
@@ -201,6 +213,8 @@ Backend:
 - Asset storage.
 - Audit/task logs.
 
+Backend should not start from page-local assumptions. Before implementation, use [backend-interface-prep.md](./backend-interface-prep.md) to confirm API groups, frontend states, payload snapshots, idempotency, credit/payment states, and traceability fields. Use [backend-api-contract.md](./backend-api-contract.md) as the MVP endpoint and DTO baseline.
+
 Admin/Agent:
 
 - Task traceability.
@@ -210,6 +224,24 @@ Admin/Agent:
 - Deterministic diagnosis summary from structured records.
 
 See [mvp-boundary-and-backlog.md](./mvp-boundary-and-backlog.md).
+
+### Current Frontend Code Boundary
+
+The prototype has started separating backend-facing concepts from page markup:
+
+- `src/types.ts`: shared template, task, asset, ledger, account, and output-setting types.
+- `src/prototypeData.ts`: replaceable local seed data for templates, tasks, assets, credit packages, payment order, upload receipt, signup risk checks, filters, and ledger rows.
+- `src/domain.ts`: pure business helpers for template input labels, output defaults, asset eligibility, category filtering, and output comparison.
+- `src/components/AuthPanel.tsx`: QR login, third-party login entry, signup reward, and signup risk checks.
+- `src/components/AssetPicker.tsx`: creation asset selection, category filtering, upload entry, and preview-only asset states.
+- `src/components/CreditPanel.tsx`: payment order lifecycle, credit summary, recharge packages, and ledger display.
+- `src/components/TaskDetail.tsx`: task traceability, failure reason, credit state, and output actions.
+- `src/components/UploadReceiptPanel.tsx`: upload status, cancellation, and retry/reselect actions.
+- `src/App.tsx`: current page composition and local interaction state.
+
+Backend integration should replace local data/state in controlled slices rather than directly rewriting the full UI.
+
+The first backend implementation should follow [backend-api-contract.md](./backend-api-contract.md) for auth, templates, assets, generation tasks, credits, and payments.
 
 ### First Templates
 
@@ -250,6 +282,16 @@ Credit lifecycle for generation:
 2. Freeze credits when task is accepted.
 3. Settle credits when task succeeds.
 4. Release credits when task fails, times out, or is blocked before generation.
+
+Credit ledger records must be structured, not plain text rows. Each ledger entry should include:
+
+- ledger ID;
+- transaction kind: freeze, settlement, release, recharge, reward, admin adjustment;
+- transaction status: frozen, settled, released, credited, granted, adjusted;
+- signed amount;
+- related task/payment/campaign/admin reference ID;
+- user-facing title/source/note;
+- creation time and idempotency key.
 
 Rules:
 

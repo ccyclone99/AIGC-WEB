@@ -9,6 +9,10 @@ Primary design proposal:
 
 - [mainstream-design-research-and-ui-proposal.md](./mainstream-design-research-and-ui-proposal.md)
 
+Next polish pass SPEC:
+
+- [frontend-polish-spec.md](./frontend-polish-spec.md)
+
 ## Prototype Entry
 
 Local URL:
@@ -64,20 +68,23 @@ The current prototype supports a fuller frontend demonstration:
 - Workbench quick actions can enter ecommerce video, seed-content, and portrait/fashion template flows.
 - Workbench shows credit balance, frozen-credit context, running/completed/refunded task counts, recent task progress, recommended templates, recent assets, and traceability/risk reminders.
 - Account Modal simulates login, QR login, third-party login, registration, and signup bonus credit delivery.
-- Credit Modal now supports selectable recharge packages and simulated payment settlement that updates balance and ledger rows.
+- Credit Modal now supports selectable recharge packages and payment settlement that updates balance and structured ledger rows with status, references, and notes.
 - Template search filters the template grid.
 - Filter Sheet supports selectable filter chips and apply feedback.
 - Template cards use staggered entrance animation.
 - Template gallery now includes several video-input template examples for future video polishing, talking-head slicing, and product-card packaging workflows.
+- Template detail exposes the MVP template contract: workflow type, template version, pricing version, settlement mode, input fields, and required capabilities.
 - Modal, Studio Overlay, Drawer, Sheet, Lightbox, and Toast have distinct entrance motion.
 - The making state removes the permanent right-side context inspector and table layout. The first completed template now defaults to current template summary, one selected image, and bottom generation command bar.
 - Product creation supports one-image generation first. `高级设置` now only contains output parameters such as ratio, video length, image resolution, and clarity. Template/image switching stays separate, and optional text inputs appear only when a template requires them.
 - Output parameter selection updates in place and is written into the submitted task trace.
-- Clicking `冻结积分并生成` creates a new queued mock task, freezes credits, writes a ledger row, closes the studio, switches to `任务`, and shows a Toast.
+- Clicking `生成视频` creates a new queued task, freezes credits, writes a ledger row, keeps the user in `工作台 / 制作视频`, and shows a Toast plus a compact background task strip.
+- Re-clicking with the same image, template, and output parameters is blocked with a `后台生成中` state. Changing an output parameter creates a valid variant path.
 - Task Center shows lifecycle stages and summary counts.
-- Task rows open a detail Drawer with traceability, lifecycle state, simulated progress advance, simulated failure/refund, preview, and download actions.
+- Task rows open a detail Drawer with structured traceability, lifecycle state, submitted parameters, provider/render attempt records, credit state, failure/refund state, preview, and download actions.
 - Completed simulated tasks add a generated video asset into the asset library.
-- Asset thumbnails in `我的` open the media Lightbox and show retention/expiry context.
+- `我的` is split into `资产`, `积分`, and `账号` tabs so asset management, recharge ledger, and login/register do not compete in one long surface.
+- Asset thumbnails in `我的 / 资产` open the media Lightbox and show retention/expiry context.
 - The asset-library prototype supports user management actions: upload, preview, download, rename, reuse in a new generation, delete/archive, restore, and filtering by asset type or expiry state.
 
 These are frontend-only demo states. Backend integration later needs to replace local state with API-backed templates, drafts, assets, tasks, credit ledger, and notifications.
@@ -96,8 +103,8 @@ The previous standalone `创作`, `资产库`, and `积分` sections are accesse
 - `工作台` is the logged-in command center.
 - Recommended template opens from `模板`.
 - Creation opens from template detail into `工作台 / 制作视频`.
-- Assets are managed under `我的`.
-- Credits open from the balance button or `我的`.
+- Assets are managed under `我的 / 资产`.
+- Credits open from the balance button or `我的 / 积分`.
 
 ## Visual Directions
 
@@ -223,7 +230,7 @@ Each main page should use a layout that matches its role:
 - `工作台`: logged-in production surface. Use compact operational layout for quick start, making videos, task state, credit state, recent assets, and risk reminders. Do not make it feel like a marketing landing page.
 - `模板`: discovery and selection surface. Prioritize search, filters, template cards, decision metadata, and visual comparison.
 - `任务`: status tracking surface. Prioritize lifecycle stages, current status, progress, traceability, and failure/refund actions.
-- `我的`: account and asset management surface. Prioritize credits, login/register surfaces, asset retention, reusable materials, and generated outputs.
+- `我的`: account and asset management surface. Use `资产`, `积分`, and `账号` tabs; prioritize credit clarity, login/register surfaces, asset retention, reusable materials, and generated outputs without stacking them into one long page.
 
 ## Initial Recommendation
 
@@ -244,3 +251,27 @@ For the complete app structure:
 - Keep modal/drawer/sheet surfaces for preview, credit, task detail, auth, and filters; use the workbench `制作视频` state for production editing.
 - Keep visual experiments as internal review routes only, not primary user navigation.
 - Do not expose admin/Agent operations to normal users in the main navigation.
+
+## 2026-06-26 Backend-State Review
+
+Added frontend-visible states that backend integration will need:
+
+- Payment order lifecycle: idle, pending, paid, failed, cancelled, expired.
+- QR login lifecycle: waiting, scanned, confirmed, expired, rejected.
+- Signup reward lifecycle: eligible, granted, claimed, risk-blocked.
+- Signup anti-abuse checks: device, IP, and phone risk rows.
+- Upload receipt lifecycle: idle, validating, uploading, saved, failed.
+- Upload receipt recovery: cancelled and rejected states, with cancel and retry/reselect actions.
+- Task failure detail: stage, reason, code, retryability, and user-facing message.
+- Generation idempotency key: generated from template version, input asset, and output settings, then exposed in task detail.
+- Payment recovery: pending payment orders can be cancelled.
+- Component boundary: auth, credit/payment, asset picker, upload receipt, and task detail panels extracted from the app shell.
+
+Browser verification:
+
+- Desktop asset library shows upload receipt.
+- Desktop credit center creates a pending payment order, then paid order increases balance and writes a recharge ledger row.
+- Desktop account tab shows reward state and three risk checks.
+- Desktop refunded task drawer shows a structured failure panel.
+- Visible task failure examples cover provider error, moderation block, and invalid input asset.
+- Mobile 390px checks for asset, credit, and account tabs show no horizontal overflow.
