@@ -558,3 +558,40 @@ Remaining optional polish:
 - Replace prototype video preview material with branded/template-specific preview MP4 files before stakeholder demo.
 - Add keyboard focus trapping for modal/drawer/sheet before production hardening.
 - Before backend starts, complete provider-specific payment callback error copy, QR polling/token invalidation wording, generation cancel/retry payload copy, and permanent-save/renew actions for expiring provider assets.
+
+## 15. 2026-06-29 Template Gallery and Creation Polish Pass
+
+Completed in this pass:
+
+- Upgraded the template gallery hero with current template metrics: directly usable templates, video-preview templates, and the one-image MVP input model.
+- Added a compact template-selection guidance strip for input, credit freeze, and traceable task submission.
+- Reworked template cards to expose decision metadata:
+  - scenario;
+  - availability state (`可直接制作` or `预览开放`);
+  - input type;
+  - output type;
+  - frozen credit cost;
+  - workflow label.
+- Reworked template detail into a clearer selection-confirmation surface:
+  - category and availability badge;
+  - scenario, input, output, and current support state;
+  - existing template protocol/settlement/ability summary kept for traceability;
+  - product templates use `进入创作台`;
+  - video-input templates stay disabled with `视频制作暂未开放`.
+- Added a reusable autoplay video component so video template cards and details actively call `play()` after load while staying muted and inline.
+- Refined the creation page copy around the image-only flow: upload one product image, confirm parameters, submit to background queue.
+- Added a compact creation readiness strip for material, output parameters, and credit availability.
+- Changed the creation advanced-settings popover to open upward on desktop so it stays inside a 1280px by 720px viewport; mobile keeps the bottom-sheet behavior.
+
+Measured verification:
+
+- `npm run lint` passes.
+- `npm run build` passes.
+- Desktop template page at 1280px by 720px has 9 cards, 9 card decision blocks, 3 guidance items, and no horizontal overflow.
+- Desktop template detail fits inside the 1280px by 720px viewport and exposes 4 decision items plus 4 protocol items.
+- Desktop creation page still fits the 1280px by 720px viewport after adding readiness checks.
+- Desktop advanced settings popover opens upward and stays inside the viewport.
+- Mobile 390px template page has no horizontal overflow; card decision blocks are hidden visually and cards remain compact.
+- Mobile 390px template detail has no horizontal overflow and uses a single-column decision panel.
+- Mobile 390px creation advanced settings opens as a bottom sheet without horizontal overflow.
+- Video template cards and template details report muted playback with `paused: false` after load.

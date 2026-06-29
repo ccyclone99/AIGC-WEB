@@ -255,15 +255,24 @@ The first backend implementation should follow [backend-api-contract.md](./backe
 
 ### First Templates
 
-Ecommerce product short video:
+MVP ecommerce product short video:
 
-- Product main image.
-- Optional detail images.
-- Product selling points.
-- Target platform.
-- Style.
-- Duration.
-- Aspect ratio.
+- Required input: one product image.
+- Optional inputs such as detail images, selling points, target platform, and style should remain template-dependent advanced fields, not required fields in the first runnable flow.
+- User-visible advanced settings should focus on output parameters first:
+  - aspect ratio;
+  - duration;
+  - resolution;
+  - quality.
+- The creation surface should allow submission without writing a prompt or filling a selling-point description.
+- Submitted tasks must snapshot the selected template, input asset, output settings, pricing version, and credit-freeze record.
+
+Reserved ecommerce variants:
+
+- Detail-image enhanced product video.
+- Selling-point subtitle product video.
+- Platform-specific ad creative.
+- Style/filter-driven product visual.
 
 Portrait/fashion transformation:
 

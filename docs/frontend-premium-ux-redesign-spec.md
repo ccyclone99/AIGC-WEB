@@ -695,6 +695,17 @@ Implemented in current prototype:
 - My page rebuilt as resource/account center with side tabs.
 - Global page width and mobile single-column behavior unified.
 
+### Phase 2.1: Template Gallery and Creation Micro-Polish
+
+Implemented in current prototype:
+
+- Template gallery now exposes direct usability, video-preview availability, input type, output type, frozen credit cost, and workflow label on cards.
+- Template detail now behaves more like a selection-confirmation surface before entering creation.
+- Video-input templates remain visible and previewable, but creation stays disabled until the video production surface is designed.
+- Video previews use a muted inline autoplay helper with an active `play()` retry after load.
+- Creation page now shows material, parameter, and credit readiness before generation.
+- Creation advanced settings stay output-parameter focused and open upward on desktop to avoid viewport overflow; mobile remains a bottom sheet.
+
 ## 9. QA Checklist
 
 Required before this pass is complete:

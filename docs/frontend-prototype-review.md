@@ -274,6 +274,31 @@ Browser verification:
 - Mobile 390px checks for homepage, production desk, template page, task page, and my page show no horizontal overflow.
 - Submitting `生成视频` keeps the user on the creation surface and displays a background task.
 
+## 2026-06-29 Template Gallery and Creation Polish Review
+
+Implemented frontend polish:
+
+- Template cards now expose user-facing decision data instead of only visual preview:
+  - availability state;
+  - input type;
+  - output type;
+  - frozen credit cost;
+  - workflow label.
+- Template detail now clarifies scenario, input, output, support state, protocol, settlement, and capabilities before entering the creation surface.
+- Video templates remain discoverable and previewable while creation is disabled.
+- Video cards and details use muted inline autoplay with an active playback retry.
+- Creation surface now includes a material/parameter/credit readiness strip.
+- Desktop advanced settings open upward to stay in viewport; mobile advanced settings remain a bottom sheet.
+
+Browser verification:
+
+- Desktop template page has no horizontal overflow and renders all template decision blocks.
+- Desktop template detail fits inside a 1280px by 720px viewport.
+- Desktop creation surface still fits inside a 1280px by 720px viewport after adding readiness checks.
+- Mobile 390px template page and template detail have no horizontal overflow.
+- Mobile 390px creation advanced settings opens as a bottom sheet.
+- Video template card and detail video elements report muted playback with `paused: false`.
+
 ## 2026-06-26 Backend-State Review
 
 Added frontend-visible states that backend integration will need:

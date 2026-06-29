@@ -78,7 +78,7 @@ export function StudioPage({
     : duplicateTask
       ? '当前图片和参数正在后台生成。换图，或调整高级设置生成变体。'
     : hasEnoughCredits
-      ? `${settingSummary} · 提交后任务进入后台。`
+      ? `${settingSummary} · 预冻结后进入后台，失败或超时自动释放。`
       : `可用 ${creditBalance} 积分，还差 ${totalCost - creditBalance} 积分。`
   const submitLabel = !hasSelectedAsset
     ? '选择图片后生成'
@@ -96,7 +96,7 @@ export function StudioPage({
           <div className="make-console-title">
             <p className="eyebrow">CURRENT SESSION</p>
             <h1>商品视频制作</h1>
-            <span>任务会进入后台，创作台保持可用。</span>
+            <span>上传一张商品图，确认参数后提交到后台队列。</span>
           </div>
           <div className="make-template-chip">
             <PackageCheck size={17} />
@@ -113,7 +113,7 @@ export function StudioPage({
             <div className="studio-stage-topline">
               <span>
                 <Sparkles size={16} />
-                模板影棚
+                视频画面预览
               </span>
               <em>{template.config.workflowLabel}</em>
             </div>
@@ -140,7 +140,7 @@ export function StudioPage({
             <div className="studio-stage-footer">
               <span>
                 <ClipboardCheck size={15} />
-                输入、参数、积分会写入同一任务链路
+                素材、参数、积分会写入同一任务链路
               </span>
               <em>{hasSelectedAsset ? selectedAsset?.source : '等待素材'}</em>
             </div>
@@ -261,6 +261,24 @@ export function StudioPage({
                   </div>
                 </div>
               )}
+            </section>
+
+            <section className="make-ready-checks" aria-label="提交前检查">
+              <span className={hasSelectedAsset ? 'is-ready' : 'is-waiting'}>
+                <CheckCircle2 size={15} />
+                <strong>素材</strong>
+                <em>{hasSelectedAsset ? '已选择' : '未选择'}</em>
+              </span>
+              <span className="is-ready">
+                <SlidersHorizontal size={15} />
+                <strong>参数</strong>
+                <em>{outputSettings.duration} / {outputSettings.resolution}</em>
+              </span>
+              <span className={hasEnoughCredits ? 'is-ready' : 'is-waiting'}>
+                <Coins size={15} />
+                <strong>积分</strong>
+                <em>{hasEnoughCredits ? '可冻结' : `差 ${totalCost - creditBalance}`}</em>
+              </span>
             </section>
 
             <section className="make-submit-panel">

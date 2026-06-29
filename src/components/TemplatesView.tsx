@@ -1,5 +1,5 @@
-import { type CSSProperties } from 'react'
-import { FileVideo, Filter, Play, Search, WandSparkles, X } from 'lucide-react'
+import { useEffect, useRef, type CSSProperties } from 'react'
+import { ArrowRight, BadgeCheck, Coins, FileVideo, Filter, ImageUp, Play, Search, ShieldCheck, WandSparkles, X } from 'lucide-react'
 
 import { templateInputLabel } from '../domain'
 import { filterGroups, initialTasks } from '../prototypeData'
@@ -7,12 +7,48 @@ import type { Template } from '../types'
 
 const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真', '视频模板']
 
+const isVideoTemplate = (template: Template) => template.category === '视频模板'
+
 const templateOutputLabel = (template: Template) => {
-  if (template.category === '视频模板') return '视频二创'
+  if (isVideoTemplate(template)) return '视频二创'
   if (template.category === '人像写真') return '写真/变装'
   if (template.scenario.includes('详情')) return '详情页素材'
   if (template.scenario.includes('投放')) return '投放素材'
   return '电商短视频'
+}
+
+const templateAvailability = (template: Template) =>
+  isVideoTemplate(template)
+    ? {
+        label: '预览开放',
+        tone: 'is-preview-only',
+        helper: '视频上传与剪辑台后续开放',
+      }
+    : {
+        label: '可直接制作',
+        tone: 'is-ready',
+        helper: '一张图片即可进入创作台',
+      }
+
+function AutoPlayVideo({ poster, src, title }: { poster: string; src: string; title: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const play = () => {
+      video.muted = true
+      void video.play().catch(() => undefined)
+    }
+
+    play()
+    video.addEventListener('canplay', play)
+
+    return () => video.removeEventListener('canplay', play)
+  }, [src])
+
+  return <video ref={videoRef} src={src} poster={poster} autoPlay muted loop playsInline preload="metadata" aria-label={title} />
 }
 
 type TemplatesViewProps = {
@@ -38,6 +74,9 @@ export function TemplatesView({
   onSearch,
   onToggleFilter,
 }: TemplatesViewProps) {
+  const usableCount = templates.filter((template) => !isVideoTemplate(template)).length
+  const videoPreviewCount = templates.length - usableCount
+
   return (
     <div className="page-stack template-page">
       <section className="hero-panel template-hero-premium template-shelf-head">
@@ -45,6 +84,20 @@ export function TemplatesView({
           <p className="eyebrow">TEMPLATE SHELF</p>
           <h1>模板库</h1>
           <p>按输入素材、输出场景和积分成本选择视频方案。</p>
+          <div className="template-hero-metrics" aria-label="模板库概览">
+            <span>
+              <strong>{usableCount}</strong>
+              <small>可直接制作</small>
+            </span>
+            <span>
+              <strong>{videoPreviewCount}</strong>
+              <small>视频预览</small>
+            </span>
+            <span>
+              <strong>1 图</strong>
+              <small>主流程输入</small>
+            </span>
+          </div>
           <div className="hero-actions">
             <button type="button" className="primary-action" onClick={() => onOpenTemplate('watch')}>
               <WandSparkles size={18} />
@@ -104,6 +157,24 @@ export function TemplatesView({
         ))}
       </section>
 
+      <section className="template-insight-strip" aria-label="模板选择提示">
+        <span>
+          <ImageUp size={16} />
+          <strong>先确认输入</strong>
+          <small>第一版主跑商品图生成视频</small>
+        </span>
+        <span>
+          <Coins size={16} />
+          <strong>再看冻结积分</strong>
+          <small>失败或超时会释放冻结</small>
+        </span>
+        <span>
+          <ShieldCheck size={16} />
+          <strong>最后进创作台</strong>
+          <small>参数和资产写入任务记录</small>
+        </span>
+      </section>
+
       {selectedFilters.length > 0 && (
         <div className="active-filter-row">
           {selectedFilters.map((filter) => (
@@ -143,17 +214,20 @@ export function TemplateDetail({
   onCreate: () => void
   onPreview: () => void
 }) {
-  const isVideoTemplate = template.category === '视频模板'
+  const isVideo = isVideoTemplate(template)
+  const availability = templateAvailability(template)
+  const inputLabel = templateInputLabel(template)
+  const outputLabel = templateOutputLabel(template)
 
   return (
     <div className="template-detail" style={{ '--template-accent': template.accent } as CSSProperties}>
-      <button type="button" className={isVideoTemplate ? 'detail-media is-video-autoplay' : 'detail-media'} onClick={onPreview}>
-        {isVideoTemplate && template.videoSrc ? (
-          <video src={template.videoSrc} poster={template.image} autoPlay muted loop playsInline />
+      <button type="button" className={isVideo ? 'detail-media is-video-autoplay' : 'detail-media'} onClick={onPreview}>
+        {isVideo && template.videoSrc ? (
+          <AutoPlayVideo src={template.videoSrc} poster={template.image} title={`${template.title} 视频预览`} />
         ) : (
           <img src={template.image} alt={template.title} />
         )}
-        {isVideoTemplate && (
+        {isVideo && (
           <>
             <i className="video-auto-label">
               <FileVideo size={14} />
@@ -166,13 +240,37 @@ export function TemplateDetail({
         )}
         <span>
           <Play size={18} fill="currentColor" />
-          {isVideoTemplate ? '打开播放预览' : '预览'}
+          {isVideo ? '打开播放预览' : '预览'}
         </span>
       </button>
       <div className="detail-copy">
-        <p className="eyebrow">{template.category}</p>
+        <div className="detail-title-bar">
+          <p className="eyebrow">{template.category}</p>
+          <span className={`template-status-pill ${availability.tone}`}>
+            <BadgeCheck size={14} />
+            {availability.label}
+          </span>
+        </div>
         <h2>{template.title}</h2>
         <p>{template.description}</p>
+        <section className="template-decision-panel" aria-label="模板选择信息">
+          <span>
+            <small>适用场景</small>
+            <strong>{template.scenario}</strong>
+          </span>
+          <span>
+            <small>输入素材</small>
+            <strong>{inputLabel}</strong>
+          </span>
+          <span>
+            <small>交付结果</small>
+            <strong>{outputLabel}</strong>
+          </span>
+          <span>
+            <small>当前状态</small>
+            <strong>{availability.helper}</strong>
+          </span>
+        </section>
         <div className="tag-row">
           {template.tags.map((tag) => (
             <span key={tag}>{tag}</span>
@@ -180,7 +278,7 @@ export function TemplateDetail({
         </div>
         <div className="spec-grid">
           <span>
-            <strong>{templateInputLabel(template)}</strong>
+            <strong>{inputLabel}</strong>
             所需输入
           </span>
           <span>
@@ -199,7 +297,7 @@ export function TemplateDetail({
         <section className="template-flow-strip" aria-label="模板产出流程">
           <span>
             <small>输入</small>
-            <strong>{templateInputLabel(template)}</strong>
+            <strong>{inputLabel}</strong>
           </span>
           <span>
             <small>模板</small>
@@ -207,7 +305,7 @@ export function TemplateDetail({
           </span>
           <span>
             <small>输出</small>
-            <strong>{templateOutputLabel(template)}</strong>
+            <strong>{outputLabel}</strong>
           </span>
         </section>
         <section className="template-contract-panel">
@@ -234,7 +332,7 @@ export function TemplateDetail({
             </span>
           </div>
         </section>
-        {isVideoTemplate && (
+        {isVideo && (
           <div className="detail-support-note">
             <FileVideo size={17} />
             <span>
@@ -243,10 +341,13 @@ export function TemplateDetail({
             </span>
           </div>
         )}
-        <button type="button" className="primary-action" disabled={isVideoTemplate} onClick={onCreate}>
-          <WandSparkles size={18} />
-          {isVideoTemplate ? '视频制作暂未开放' : '使用模板'}
-        </button>
+        <div className="template-detail-action">
+          <p>{isVideo ? '当前先用于预览和方案确认。' : '进入创作台后只需要选择图片，默认参数可直接提交。'}</p>
+          <button type="button" className="primary-action" disabled={isVideo} onClick={onCreate}>
+            <WandSparkles size={18} />
+            {isVideo ? '视频制作暂未开放' : '进入创作台'}
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -294,11 +395,14 @@ function TemplateCard({
   onOpen: (templateId: string) => void
 }) {
   const typeClass =
-    template.category === '视频模板'
+    isVideoTemplate(template)
       ? 'is-video-template'
       : template.category === '人像写真'
         ? 'is-portrait-template'
         : 'is-image-template'
+  const isVideo = isVideoTemplate(template)
+  const availability = templateAvailability(template)
+  const inputLabel = templateInputLabel(template)
   const outputLabel = templateOutputLabel(template)
 
   return (
@@ -309,14 +413,15 @@ function TemplateCard({
       onClick={() => onOpen(template.id)}
     >
       <span className="template-media">
-        {template.category === '视频模板' && template.videoSrc ? (
-          <video src={template.videoSrc} poster={template.image} autoPlay muted loop playsInline />
+        {isVideo && template.videoSrc ? (
+          <AutoPlayVideo src={template.videoSrc} poster={template.image} title={`${template.title} 视频预览`} />
         ) : (
           <img src={template.image} alt={template.title} />
         )}
         <span>{template.category}</span>
-        <em>{templateInputLabel(template)}</em>
-        {template.category === '视频模板' && (
+        <em>{inputLabel}</em>
+        <i className={`template-media-state ${availability.tone}`}>{availability.label}</i>
+        {isVideo && (
           <i className="template-play-badge">
             <Play size={14} fill="currentColor" />
           </i>
@@ -327,18 +432,34 @@ function TemplateCard({
         </i>
       </span>
       <span className="template-body">
-        <small>{template.scenario}</small>
+        <span className="template-card-kicker">
+          <small>{template.scenario}</small>
+          <em className={availability.tone}>{availability.label}</em>
+        </span>
         <strong>{template.title}</strong>
         <b>{template.description}</b>
-        <span className="template-output-map">
-          <em>{templateInputLabel(template)}</em>
-          <i />
-          <em>{outputLabel}</em>
+        <span className="template-card-decisions">
+          <span>
+            <small>输入</small>
+            <strong>{inputLabel}</strong>
+          </span>
+          <span>
+            <small>输出</small>
+            <strong>{outputLabel}</strong>
+          </span>
+          <span>
+            <small>冻结</small>
+            <strong>{template.cost} 积分</strong>
+          </span>
         </span>
         <span className="template-meta">
           <em>{template.duration}</em>
           <em>{template.ratio}</em>
-          <em>{template.cost} 积分</em>
+          <em>{template.config.workflowLabel}</em>
+        </span>
+        <span className="template-card-cta">
+          <em>{isVideo ? '播放预览' : '查看并制作'}</em>
+          <ArrowRight size={15} />
         </span>
       </span>
     </button>
