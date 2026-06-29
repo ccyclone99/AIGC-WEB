@@ -1,7 +1,7 @@
 # AIGC Web SPEC
 
-Status: Draft
-Last updated: 2026-06-26
+Status: Draft, frontend prototype baseline updated
+Last updated: 2026-06-29
 
 ## 1. Overview
 
@@ -16,15 +16,15 @@ Primary MVP template categories:
 - Product image to ecommerce short video.
 - Portrait photo to portrait/fashion transformation video.
 
-Initial user-facing website navigation:
+Current user-facing website navigation:
 
 - `首页`: public website homepage for product positioning, primary use cases, registration bonus entry, template browsing, and entry into the logged-in workspace.
-- `工作台`: logged-in production center for quick start, making videos, active task status, credit state, recent assets, recommended templates, and traceability/risk reminders.
+- `生产台`: logged-in production center for starting videos, monitoring background tasks, checking credit state, and reusing recent assets. The code route can still use `workbench`; the visible product label is `生产台`.
 - `模板`: template discovery, search, filtering, preview, and entry into template-based creation.
 - `任务`: task list, progress, completion/failure/refund status, and task traceability.
 - `我的`: account-adjacent space split into `资产`, `积分`, and `账号` tabs for asset management, credit recharge/ledger, login/register, and personal records.
 
-The homepage and workbench are separate surfaces. The homepage is the public product entry. The workbench is the logged-in production center. Template details can still open in a modal for preview, but serious creation should move into the workbench's `制作视频` state, not stay trapped inside a modal.
+The homepage and production desk are separate surfaces. The homepage is the public product entry. The production desk is the logged-in production center. Template details can still open in a modal for preview, but serious creation should move into the production desk's creation state, not stay trapped inside a modal.
 
 Page layout principle:
 
@@ -39,7 +39,7 @@ Page layout principle:
 - Submitting a generation task should not force navigation to `任务`. The task enters the background, credits are frozen, a toast confirms submission, and the creation surface remains available for the next image/template.
 - If the same image, template, and output parameters already have an active background task, the creation surface should show a processing state instead of allowing accidental duplicate submission. Users can change the image or output settings to create a new variant.
 - Each generation submit must carry an idempotency key derived from the submitted template version, input asset, and output settings or an equivalent server-issued submit token.
-- MVP creation pages should avoid a permanent right-side parameter/checklist panel. Parameters should appear inline, collapsed, or contextually when needed so PC width is used for batch production.
+- MVP creation pages should avoid a permanent right-side parameter/checklist panel. Parameters should appear inline, collapsed, or contextually when needed so PC width is used for the media stage and repeated creation.
 - Tracking pages should prioritize state, progress, traceability, and recovery actions.
 - Task detail must expose structured traceability before backend integration: submitted parameter snapshot, template/pricing version, credit ledger state, provider attempts, render/post-production records, moderation/fallback state, and output asset state.
 - Task failure state must distinguish failure stage, reason, error code, retryability, user-facing message, and whether frozen credits were released.
@@ -167,8 +167,8 @@ Frontend quality is mandatory. Motion/card interactions should be explored throu
 Frontend complexity should be reduced through lightweight pages plus overlays:
 
 - Template cards open a template detail modal.
-- Template use routes into the workbench's `制作视频` state, not a cramped drawer or modal.
-- `制作视频` defaults to image-only generation. Advanced settings are output parameters such as ratio, video length, image resolution, and clarity; they are not template switching, style writing, or required prompt fields.
+- Template use routes into the production desk creation state, not a cramped drawer or modal.
+- `创作台` defaults to image-only generation. Advanced settings are output parameters such as ratio, video length, image resolution, and clarity; they are not template switching, style writing, or required prompt fields.
 - Template configuration must follow the frontend-approved contract for inputs, output settings, capabilities, pricing version, settlement, and trace fields.
 - Task detail opens a task drawer.
 - Filters use popovers or bottom sheets.
@@ -232,12 +232,22 @@ The prototype has started separating backend-facing concepts from page markup:
 - `src/types.ts`: shared template, task, asset, ledger, account, and output-setting types.
 - `src/prototypeData.ts`: replaceable local seed data for templates, tasks, assets, credit packages, payment order, upload receipt, signup risk checks, filters, and ledger rows.
 - `src/domain.ts`: pure business helpers for template input labels, output defaults, asset eligibility, category filtering, and output comparison.
+- `src/hooks/usePrototypeStore.ts`: local prototype state boundary that can later be replaced by API-backed slices.
+- `src/api/*`: frontend API contract placeholders and mapping boundary for backend integration.
+- `src/components/HomeView.tsx`: public product entry.
+- `src/components/WorkbenchView.tsx`: visible `生产台`, the logged-in production hub.
+- `src/components/StudioPage.tsx`: image-only creation surface with background task behavior.
+- `src/components/TemplatesView.tsx`: template discovery and detail surfaces.
+- `src/components/TasksView.tsx`: task monitor and traceable task list.
+- `src/components/MeView.tsx`: resource/account center shell.
 - `src/components/AuthPanel.tsx`: QR login, third-party login entry, signup reward, and signup risk checks.
 - `src/components/AssetPicker.tsx`: creation asset selection, category filtering, upload entry, and preview-only asset states.
+- `src/components/AssetManager.tsx`: user-managed asset library.
 - `src/components/CreditPanel.tsx`: payment order lifecycle, credit summary, recharge packages, and ledger display.
 - `src/components/TaskDetail.tsx`: task traceability, failure reason, credit state, and output actions.
 - `src/components/UploadReceiptPanel.tsx`: upload status, cancellation, and retry/reselect actions.
-- `src/App.tsx`: current page composition and local interaction state.
+- `src/components/AppOverlays.tsx` and `src/components/OverlayPrimitives.tsx`: modal, drawer, sheet, lightbox, toast, and asset-picker orchestration.
+- `src/App.tsx`: current page composition.
 
 Backend integration should replace local data/state in controlled slices rather than directly rewriting the full UI.
 

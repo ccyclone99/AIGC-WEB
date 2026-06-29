@@ -14,6 +14,7 @@ This directory contains the current product, architecture, and implementation pl
 
 - [frontend-ux-direction.md](./frontend-ux-direction.md): user-facing website and page structure.
 - [frontend-polish-spec.md](./frontend-polish-spec.md): next frontend-only visual, interaction, and responsive polish pass.
+- [frontend-premium-ux-redesign-spec.md](./frontend-premium-ux-redesign-spec.md): premium page-role refactor, creation studio, video-native gallery, and production-loop SPEC.
 - [mainstream-design-research-and-ui-proposal.md](./mainstream-design-research-and-ui-proposal.md): mainstream competitor research and complete UI proposal.
 - [motion-prototype-plan.md](./motion-prototype-plan.md): card flip, hover preview, bento, before/after, and transition prototypes.
 - [frontend-prototype-review.md](./frontend-prototype-review.md): implemented prototype pack and review criteria.
@@ -41,6 +42,9 @@ This directory contains the current product, architecture, and implementation pl
 - [data-model-direction.md](./data-model-direction.md): core entities and relationships.
 - [backend-interface-prep.md](./backend-interface-prep.md): frontend-to-backend interface prep and readiness gate.
 - [backend-api-contract.md](./backend-api-contract.md): backend API endpoint and DTO contract drafted from the frontend state.
+- [backend-readiness-audit.md](./backend-readiness-audit.md): frontend/backend readiness audit before real backend work.
+- [backend-integration-sequence.md](./backend-integration-sequence.md): recommended backend integration sequence after frontend prototype freeze.
+- [backend-first-replacement-checklist.md](./backend-first-replacement-checklist.md): checklist for replacing local prototype state with API-backed slices.
 - [template-config-design.md](./template-config-design.md): generic TemplateConfig structure.
 - [template-config-contract.md](./template-config-contract.md): frontend-approved MVP template contract used by the current prototype.
 - [video-composition-rendering-strategy.md](./video-composition-rendering-strategy.md): VideoCompositionSpec, Remotion, FFmpeg, renderer adapters.
@@ -60,10 +64,10 @@ This directory contains the current product, architecture, and implementation pl
 
 ## Recommended First Build Path
 
-1. Use [frontend-polish-spec.md](./frontend-polish-spec.md) for the next frontend-only polish pass.
-2. Improve homepage, template gallery, creation workspace, task detail, asset library, and motion system.
-3. Re-run desktop/mobile prototype review after the frontend feels premium enough.
-4. Split the frontend prototype into stable type, data, domain, page, and component boundaries.
-5. Use [backend-interface-prep.md](./backend-interface-prep.md) and [backend-api-contract.md](./backend-api-contract.md) as the gate before adding backend foundation.
+1. Use [frontend-premium-ux-redesign-spec.md](./frontend-premium-ux-redesign-spec.md) as the current frontend page-role and polish baseline.
+2. Continue refining homepage, production desk, template gallery, creation studio, task tracking, and asset/account management against the current prototype.
+3. Re-run desktop/mobile prototype review after each substantial frontend pass.
+4. Keep frontend state boundaries stable around templates, assets, tasks, credits, auth, and overlays.
+5. Use [backend-interface-prep.md](./backend-interface-prep.md), [backend-api-contract.md](./backend-api-contract.md), [backend-readiness-audit.md](./backend-readiness-audit.md), and [backend-integration-sequence.md](./backend-integration-sequence.md) as the gate before adding backend foundation.
 6. Implement template schema, credit ledger, generation task lifecycle, mock provider, and asset storage.
 7. Add real provider and payment integrations after the mock task-credit-asset loop is verified.

@@ -5,12 +5,14 @@ import {
   ClipboardCheck,
   Clock3,
   Coins,
+  FileVideo,
   ImagePlus,
   Images,
   PackageCheck,
   Play,
   ShieldCheck,
   SlidersHorizontal,
+  Sparkles,
   Upload,
   Wallet,
   WandSparkles,
@@ -90,11 +92,11 @@ export function StudioPage({
   return (
     <div className="studio-page-v3 make-simple-page make-console-page">
       <section className="make-simple-card make-console-card" style={{ '--template-accent': template.accent } as CSSProperties}>
-        <header className="make-simple-head make-console-head">
+        <header className="make-simple-head make-console-head studio-editor-head">
           <div className="make-console-title">
-            <p className="eyebrow">MAKE VIDEO</p>
-            <h1>制作视频</h1>
-            <span>上传或选择一张商品图，确认参数后直接生成。</span>
+            <p className="eyebrow">CURRENT SESSION</p>
+            <h1>商品视频制作</h1>
+            <span>任务会进入后台，创作台保持可用。</span>
           </div>
           <div className="make-template-chip">
             <PackageCheck size={17} />
@@ -107,25 +109,44 @@ export function StudioPage({
         </header>
 
         <div className="make-simple-grid image-only-grid make-console-layout">
-          <section className="make-preview-panel image-only-panel">
+          <section className="make-preview-panel image-only-panel studio-stage-panel">
+            <div className="studio-stage-topline">
+              <span>
+                <Sparkles size={16} />
+                模板影棚
+              </span>
+              <em>{template.config.workflowLabel}</em>
+            </div>
             {selectedAsset ? (
-              <button type="button" className="image-upload-card" onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}>
+              <button type="button" className="image-upload-card studio-stage-card" onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}>
                 <img src={selectedAsset.image} alt={`${selectedAsset.name} 当前商品`} />
+                <span className="studio-stage-badge">
+                  <FileVideo size={15} />
+                  输出 {outputSettings.duration} 视频
+                </span>
+                <span className="studio-stage-ratio">{outputSettings.ratio}</span>
                 <span className="image-upload-status">
                   <CheckCircle2 size={18} />
                   图片已就绪
                 </span>
               </button>
             ) : (
-              <button type="button" className="image-upload-card image-upload-empty" onClick={onOpenAssetPicker}>
+              <button type="button" className="image-upload-card image-upload-empty studio-stage-card" onClick={onOpenAssetPicker}>
                 <ImagePlus size={34} />
                 <strong>选择商品图</strong>
                 <span>从资产库选择，或上传新图片</span>
               </button>
             )}
+            <div className="studio-stage-footer">
+              <span>
+                <ClipboardCheck size={15} />
+                输入、参数、积分会写入同一任务链路
+              </span>
+              <em>{hasSelectedAsset ? selectedAsset?.source : '等待素材'}</em>
+            </div>
           </section>
 
-          <section className="make-form-panel image-only-copy make-control-panel">
+          <section className="make-form-panel image-only-copy make-control-panel studio-control-tower">
             <div className="make-control-section make-asset-panel">
               <div className="make-panel-heading">
                 <span>
@@ -136,7 +157,7 @@ export function StudioPage({
                   {selectedAsset ? '已就绪' : '未选择'}
                 </em>
               </div>
-              <p>当前模板只需要一张商品图。图片可以来自资产库，也可以直接上传。</p>
+              <p>图片可来自资产库，也可以直接上传；提交后参数会写入任务记录。</p>
               <div className="studio-asset-state make-asset-state">
                 <span>
                   <Images size={15} />
@@ -152,17 +173,29 @@ export function StudioPage({
                 </span>
               </div>
               <div className="make-upload-actions make-console-actions">
-                <button type="button" className="secondary-action upload-inline-button" onClick={onOpenAssetPicker}>
+                <button type="button" className="secondary-action upload-inline-button make-replace-action" onClick={onOpenAssetPicker}>
                   <Upload size={18} />
                   {selectedAsset ? '替换图片' : '选择图片'}
                 </button>
                 {selectedAsset && (
                   <>
-                    <button type="button" className="secondary-action" onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}>
+                    <button
+                      type="button"
+                      className="secondary-action make-icon-action"
+                      title="预览图片"
+                      aria-label="预览图片"
+                      onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}
+                    >
                       <Play size={18} />
                       预览图片
                     </button>
-                    <button type="button" className="secondary-action" onClick={() => onAssetSelect('')}>
+                    <button
+                      type="button"
+                      className="secondary-action make-icon-action"
+                      title="移除图片"
+                      aria-label="移除图片"
+                      onClick={() => onAssetSelect('')}
+                    >
                       <X size={18} />
                       移除图片
                     </button>

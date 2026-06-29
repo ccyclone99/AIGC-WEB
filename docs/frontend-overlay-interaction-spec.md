@@ -1,13 +1,13 @@
 # Frontend Overlay Interaction SPEC
 
-Status: Draft decision
-Last updated: 2026-06-25
+Status: Draft decision, naming updated
+Last updated: 2026-06-29
 
 This SPEC defines how AIGC Web should use purpose-built pages plus overlays to reduce page complexity.
 
 ## Core Principle
 
-The main discovery and management pages should be scanning surfaces. Detailed preview and account decisions can open in focused overlays. Actual production editing should use a full workbench making state because ecommerce creation needs persistent template, product, preview, and command-bar context.
+The main discovery and management pages should be scanning surfaces. Detailed preview and account decisions can open in focused overlays. Actual production editing should use a full production-desk creation state because ecommerce creation needs persistent template, product, preview, and command-bar context.
 
 Pages should show:
 
@@ -24,7 +24,7 @@ Pages should not show:
 - Advanced options.
 - Provider/debug details.
 
-Those details should move into Modal, Drawer, Bottom Sheet, or Lightbox surfaces, except for production editing, which belongs in the workbench's `制作视频` state.
+Those details should move into Modal, Drawer, Bottom Sheet, or Lightbox surfaces, except for production editing, which belongs in the production desk's `创作台` state.
 
 ## Overlay Types
 
@@ -40,14 +40,14 @@ Behavior:
 - Centered modal on desktop.
 - Background is dimmed and blurred.
 - Shows preview media, template summary, credit cost, duration, ratio, tags, and primary CTA.
-- CTA opens the workbench's `制作视频` state with the selected template.
+- CTA opens the production desk's `创作台` state with the selected template.
 
 Do not:
 
 - Put the full creation form inside the first detail modal.
 - Show provider internals or traceability details here.
 
-### Workbench Making State
+### Production Desk Creation State
 
 Use when:
 
@@ -58,7 +58,7 @@ Use when:
 Behavior:
 
 - Full page, not a modal-first workflow.
-- Lives under the `工作台` navigation item rather than becoming a separate top-level page.
+- Lives under the `生产台` navigation item rather than becoming a separate top-level page.
 - Default visible surface for the first MVP template: current-template summary, one uploaded/selected image, and the generation command bar.
 - Selling-point text appears only when the selected template requires it.
 - Template switching, style choice, optional text inputs, and multi-product controls stay under `更多设置`.
@@ -157,14 +157,14 @@ Behavior:
 User-facing main navigation should stay compact:
 
 - `首页`
-- `工作台`
+- `生产台`
 - `模板`
 - `任务`
 - `我的`
 
-`首页` is the public website homepage. It introduces the product, main use cases, registration bonus, template browsing, and entry into the workbench.
+`首页` is the public website homepage. It introduces the product, main use cases, registration bonus, template browsing, and entry into the production desk.
 
-`工作台` is the logged-in production center. It summarizes quick starts, active tasks, credit state, recent assets, recommended templates, and risk/traceability reminders. It also owns the `制作视频` state after a user selects a template. It should not become an admin console and should not expose Agent or provider operations to normal users.
+`生产台` is the logged-in production center. It summarizes quick starts, active tasks, credit state, recent assets, and recommended templates. It also owns the `创作台` state after a user selects a supported template. It should not become an admin console and should not expose Agent or provider operations to normal users.
 
 Optional internal-only entry:
 
@@ -191,14 +191,14 @@ Prototype may simulate these behaviors visually, but production must implement t
 Desktop:
 
 - Template details: centered modal.
-- Creation: full workbench `制作视频` state.
+- Creation: full production-desk `创作台` state.
 - Task details: right drawer.
 - Filters: popover or drawer.
 
 Mobile:
 
 - Template details: near full-screen modal or bottom sheet.
-- Creation: full-page responsive workbench making flow.
+- Creation: full-page responsive production-desk creation flow.
 - Task details: bottom sheet.
 - Filters: bottom sheet.
 
@@ -216,7 +216,7 @@ Analytics should track:
 
 - Template card click.
 - Template modal open.
-- Workbench making state open.
+- Production-desk creation state open.
 - Credit confirmation.
 - Generation submit.
 - Task detail open.
@@ -227,7 +227,7 @@ Analytics should track:
 Use lightweight pages plus overlays for MVP:
 
 - Template cards open Template Detail Modal.
-- `使用模板` opens the workbench `制作视频` state.
+- `使用模板` opens the production desk `创作台` state.
 - Task rows open Task Detail Drawer.
 - Balance opens Credit Modal.
 - Filters open Bottom Sheet/Popover.

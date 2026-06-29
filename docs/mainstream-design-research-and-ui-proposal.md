@@ -200,12 +200,12 @@ Secondary promise:
 Main navigation should remain:
 
 - `首页`
-- `工作台`
+- `生产台`
 - `模板`
 - `任务`
 - `我的`
 
-Do not add a top-level `创作台` in MVP. It overlaps with `工作台` and adds cognitive load.
+Do not add a top-level `创作台` in MVP. It overlaps with `生产台` and adds cognitive load. `创作台` should remain the creation surface entered from a template or production-desk action.
 
 ### 首页
 
@@ -252,7 +252,7 @@ Card requirements:
 - Ratio and duration.
 - CTA in detail modal, not on every card if it makes the grid noisy.
 
-### 工作台
+### 生产台
 
 Role:
 
@@ -262,7 +262,7 @@ Role:
 
 Default layout:
 
-- Top quick start: recommended template and `制作视频`.
+- Top quick start: recommended template and `创作台`.
 - Credit status.
 - Active tasks.
 - Recent outputs/assets.
@@ -275,7 +275,7 @@ Do not show:
 - Large marketing hero sections.
 - Dense admin diagnostics.
 
-### 工作台 / 制作视频
+### 生产台 / 创作台
 
 Role:
 
@@ -369,7 +369,7 @@ Visual characteristics:
 Typography:
 
 - Large, confident homepage headline.
-- Compact operational headings in workbench/task pages.
+- Compact operational headings in production-desk/task pages.
 - Avoid oversized headings inside tool panels.
 
 Cards:
@@ -609,7 +609,7 @@ Interaction:
 ### Phase 1: Simplify and Polish Current Flow
 
 - Keep main navigation to 5 items.
-- Make `制作视频` image-only by default.
+- Make `创作台` image-only by default.
 - Remove required text fields from first completed template.
 - Make `高级设置` the home for output parameters, not style or template switching.
 - Ensure desktop and mobile have no horizontal overflow.
@@ -671,8 +671,8 @@ Checked against the proposal on 2026-06-25.
 
 ### Already Aligned
 
-- Main navigation is reduced to five items: `首页`, `工作台`, `模板`, `任务`, `我的`.
-- `工作台` owns the `制作视频` state, avoiding a separate top-level creation page.
+- Main navigation is reduced to five items: `首页`, `生产台`, `模板`, `任务`, `我的`.
+- `生产台` owns the `创作台` state, avoiding a separate top-level creation page.
 - The first making flow is now image-only and does not require text.
 - `高级设置` now holds output parameters: ratio, duration, resolution, and clarity.
 - Credit estimate and generation action are visible before submit.
@@ -714,6 +714,6 @@ Implement a "Design Pass 1" focused only on visual clarity and perceived quality
 
 1. Redesign homepage hero around `上传一张商品图，生成一条电商短视频`.
 2. Add `只需图片` badges to template cards and detail modal.
-3. Upgrade `制作视频` empty/ready image states.
+3. Upgrade `创作台` empty/ready image states.
 4. Make task completion/output preview more attractive.
 5. Run desktop and mobile browser verification.

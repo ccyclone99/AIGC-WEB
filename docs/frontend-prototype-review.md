@@ -1,7 +1,7 @@
 # Frontend Prototype Review
 
-Status: Implemented lightweight page plus overlay prototype
-Last updated: 2026-06-25
+Status: Implemented page-role refactor prototype
+Last updated: 2026-06-29
 
 The frontend prototype pack is implemented in `src/App.tsx` and `src/App.css`.
 
@@ -12,6 +12,7 @@ Primary design proposal:
 Next polish pass SPEC:
 
 - [frontend-polish-spec.md](./frontend-polish-spec.md)
+- [frontend-premium-ux-redesign-spec.md](./frontend-premium-ux-redesign-spec.md)
 
 ## Prototype Entry
 
@@ -25,7 +26,7 @@ Local URL:
 
 The previous prototype included a fuller product shell with these modules:
 
-- `工作台`: overview of the main ecommerce video generation flow.
+- `生产台`: logged-in production hub for starting video creation, monitoring background tasks, and reusing recent assets.
 - `模板广场`: searchable/filterable template gallery with ecommerce-first categories.
 - `创作`: generation workspace with uploads, simple inputs, platform preset, style selection, advanced options, credit pre-freeze, and traceability cues.
 - `任务`: task center with running, success, and refunded states plus a traceability panel.
@@ -37,7 +38,7 @@ Implemented user path:
 
 1. Open homepage.
 2. Register or browse templates from the public entry.
-3. Enter workbench as the logged-in production center.
+3. Enter production desk as the logged-in production center.
 4. Select a template.
 5. Enter the creation workspace.
 6. Review upload fields, generation options, credit pre-freeze, and traceability notes.
@@ -49,7 +50,7 @@ This is still a frontend prototype. It uses local React state and mock data, not
 The current revision uses a lighter page plus overlay model:
 
 - Template cards open a detail Modal with blurred background.
-- Template detail routes into the workbench `制作视频` state.
+- Template detail routes into the production desk creation state.
 - The previous large making overlay is no longer part of the primary production surface.
 - Task traceability moves into a Task Detail Drawer.
 - Filters use a compact Sheet.
@@ -62,11 +63,11 @@ See `docs/frontend-overlay-interaction-spec.md`.
 
 The current prototype supports a fuller frontend demonstration:
 
-- `工作台` is now the default logged-in landing page and product command center.
-- `首页` is now a separate public homepage for product positioning, primary use cases, registration bonus entry, template browsing, and workbench entry.
-- `工作台` now owns both the logged-in overview and the `制作视频` state after a user selects a template.
-- Workbench quick actions can enter ecommerce video, seed-content, and portrait/fashion template flows.
-- Workbench shows credit balance, frozen-credit context, running/completed/refunded task counts, recent task progress, recommended templates, recent assets, and traceability/risk reminders.
+- `首页` is a separate public product entry with a one-image-to-video visual and clear routes to template generation, production desk, and asset management.
+- `生产台` is the logged-in production hub and product command center.
+- `生产台` owns the entry into the current creation surface after a user selects a supported template.
+- Production desk quick actions can enter ecommerce image-to-video creation and open template discovery.
+- Production desk shows credit balance, frozen-credit context, running/completed/refunded task counts, current task progress, recent assets, and recommended templates without exposing a full management table.
 - Account Modal simulates login, QR login, third-party login, registration, and signup bonus credit delivery.
 - Credit Modal now supports selectable recharge packages and payment settlement that updates balance and structured ledger rows with status, references, and notes.
 - Template search filters the template grid.
@@ -78,7 +79,7 @@ The current prototype supports a fuller frontend demonstration:
 - The making state removes the permanent right-side context inspector and table layout. The first completed template now defaults to current template summary, one selected image, and bottom generation command bar.
 - Product creation supports one-image generation first. `高级设置` now only contains output parameters such as ratio, video length, image resolution, and clarity. Template/image switching stays separate, and optional text inputs appear only when a template requires them.
 - Output parameter selection updates in place and is written into the submitted task trace.
-- Clicking `生成视频` creates a new queued task, freezes credits, writes a ledger row, keeps the user in `工作台 / 制作视频`, and shows a Toast plus a compact background task strip.
+- Clicking `生成视频` creates a new queued task, freezes credits, writes a ledger row, keeps the user in the creation surface, and shows a Toast plus a compact background task strip.
 - Re-clicking with the same image, template, and output parameters is blocked with a `后台生成中` state. Changing an output parameter creates a valid variant path.
 - Task Center shows lifecycle stages and summary counts.
 - Task rows open a detail Drawer with structured traceability, lifecycle state, submitted parameters, provider/render attempt records, credit state, failure/refund state, preview, and download actions.
@@ -92,7 +93,7 @@ These are frontend-only demo states. Backend integration later needs to replace 
 Current user-facing navigation is:
 
 - `首页`
-- `工作台`
+- `生产台`
 - `模板`
 - `任务`
 - `我的`
@@ -100,9 +101,9 @@ Current user-facing navigation is:
 The previous standalone `创作`, `资产库`, and `积分` sections are accessed through context:
 
 - `首页` is the public website entry.
-- `工作台` is the logged-in command center.
+- `生产台` is the logged-in command center.
 - Recommended template opens from `模板`.
-- Creation opens from template detail into `工作台 / 制作视频`.
+- Creation opens from template detail into the production desk creation surface.
 - Assets are managed under `我的 / 资产`.
 - Credits open from the balance button or `我的 / 积分`.
 
@@ -182,9 +183,9 @@ Watchouts:
 - Requires strong before/after assets.
 - Should not imply guaranteed output quality.
 
-### 5. Making Flow
+### 5. Creation Flow
 
-Chinese UI label: `制作视频`
+Chinese UI label: `创作台`
 
 Purpose:
 
@@ -227,7 +228,7 @@ For the full product flow, review:
 Each main page should use a layout that matches its role:
 
 - `首页`: public product homepage. Use stronger brand visuals, product positioning, primary use cases, and conversion actions. Do not show operational queues as the main content.
-- `工作台`: logged-in production surface. Use compact operational layout for quick start, making videos, task state, credit state, recent assets, and risk reminders. Do not make it feel like a marketing landing page.
+- `生产台`: logged-in production surface. Use compact operational layout for quick start, task state, credit state, recent assets, and recommended templates. Do not make it feel like a marketing landing page.
 - `模板`: discovery and selection surface. Prioritize search, filters, template cards, decision metadata, and visual comparison.
 - `任务`: status tracking surface. Prioritize lifecycle stages, current status, progress, traceability, and failure/refund actions.
 - `我的`: account and asset management surface. Use `资产`, `积分`, and `账号` tabs; prioritize credit clarity, login/register surfaces, asset retention, reusable materials, and generated outputs without stacking them into one long page.
@@ -239,18 +240,39 @@ Use a combined direction:
 - Template gallery: `影棚翻卡` + selected parts of `快剪预览`.
 - Template discovery/category page: selected parts of `经营看板`.
 - Portrait/fashion detail pages: `前后对照`.
-- Actual generation state: `工作台 / 制作视频`.
+- Actual generation state: `生产台 / 创作台`.
 
 This avoids forcing one motion style onto every page.
 
 For the complete app structure:
 
-- Keep `首页`, `工作台`, `模板`, `任务`, and `我的` as the main user navigation for MVP prototype review.
+- Keep `首页`, `生产台`, `模板`, `任务`, and `我的` as the main user navigation for MVP prototype review.
 - Keep `首页` as the public product homepage.
-- Use `工作台` as the logged-in production center, not the public homepage.
-- Keep modal/drawer/sheet surfaces for preview, credit, task detail, auth, and filters; use the workbench `制作视频` state for production editing.
+- Use `生产台` as the logged-in production center, not the public homepage.
+- Keep modal/drawer/sheet surfaces for preview, credit, task detail, auth, and filters; use the production desk creation state for production editing.
 - Keep visual experiments as internal review routes only, not primary user navigation.
 - Do not expose admin/Agent operations to normal users in the main navigation.
+
+## 2026-06-29 Page Role Refactor Review
+
+Implemented frontend role cleanup:
+
+- Homepage rebuilt as the public product entry.
+- Top navigation label changed to `生产台`.
+- Production desk rebuilt as the logged-in production hub.
+- Creation surface remains available after submit; tasks run in the background.
+- Template page keeps discovery and preview responsibility.
+- Task page rebuilt as task monitor plus traceable record list.
+- My page rebuilt as `资源与账号` with asset, credit, and account sections.
+- Global desktop width and mobile single-column behavior were unified.
+
+Browser verification:
+
+- Desktop homepage, production desk, template page, task page, my page, and creation surface show the expected new page roots.
+- Desktop pages have no horizontal overflow.
+- Creation desktop view fits the 1280px by 720px viewport.
+- Mobile 390px checks for homepage, production desk, template page, task page, and my page show no horizontal overflow.
+- Submitting `生成视频` keeps the user on the creation surface and displays a background task.
 
 ## 2026-06-26 Backend-State Review
 

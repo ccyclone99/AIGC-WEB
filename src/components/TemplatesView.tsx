@@ -5,6 +5,16 @@ import { templateInputLabel } from '../domain'
 import { filterGroups, initialTasks } from '../prototypeData'
 import type { Template } from '../types'
 
+const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真', '视频模板']
+
+const templateOutputLabel = (template: Template) => {
+  if (template.category === '视频模板') return '视频二创'
+  if (template.category === '人像写真') return '写真/变装'
+  if (template.scenario.includes('详情')) return '详情页素材'
+  if (template.scenario.includes('投放')) return '投放素材'
+  return '电商短视频'
+}
+
 type TemplatesViewProps = {
   searchTerm: string
   selectedFilters: string[]
@@ -30,11 +40,11 @@ export function TemplatesView({
 }: TemplatesViewProps) {
   return (
     <div className="page-stack template-page">
-      <section className="hero-panel">
+      <section className="hero-panel template-hero-premium template-shelf-head">
         <div>
-          <p className="eyebrow">TEMPLATE FIRST</p>
-          <h1>商品图生成电商短视频</h1>
-          <p>选模板、上传图片即可开始，其他交给模板工作流。</p>
+          <p className="eyebrow">TEMPLATE SHELF</p>
+          <h1>模板库</h1>
+          <p>按输入素材、输出场景和积分成本选择视频方案。</p>
           <div className="hero-actions">
             <button type="button" className="primary-action" onClick={() => onOpenTemplate('watch')}>
               <WandSparkles size={18} />
@@ -46,10 +56,20 @@ export function TemplatesView({
             </button>
           </div>
         </div>
-        <button type="button" className="hero-preview" onClick={() => onOpenTemplate('watch')}>
-          <img src={templates[0]?.image ?? initialTasks[1].image} alt="精品表款模板预览" />
-          <span>只需图片 · 168 积分 · 8s · 9:16</span>
-        </button>
+        <div className="template-hero-preview-stack">
+          <button type="button" className="hero-preview template-hero-main-preview" onClick={() => onOpenTemplate('watch')}>
+            <img src={templates[0]?.image ?? initialTasks[1].image} alt="精品表款模板预览" />
+            <span>商品图输入</span>
+            <em>8 秒质感转场 · 168 积分</em>
+          </button>
+          <button type="button" className="template-hero-side-preview" onClick={onPreview}>
+            <Play size={18} fill="currentColor" />
+            <span>
+              <strong>预览输出节奏</strong>
+              <small>先看样片，再进入创作台。</small>
+            </span>
+          </button>
+        </div>
       </section>
 
       <section className="toolbar-row">
@@ -66,6 +86,22 @@ export function TemplatesView({
           {selectedFilters.length > 0 ? `筛选 ${selectedFilters.length}` : '筛选'}
         </button>
         <span className="template-count-chip">{templates.length} 个模板</span>
+      </section>
+
+      <section className="template-mode-strip" aria-label="模板类型">
+        <button type="button" className={selectedFilters.length === 0 ? 'is-selected' : ''} onClick={onClearFilters}>
+          推荐
+        </button>
+        {quickTemplateFilters.map((filter) => (
+          <button
+            type="button"
+            key={filter}
+            className={selectedFilters.includes(filter) ? 'is-selected' : ''}
+            onClick={() => onToggleFilter(filter)}
+          >
+            {filter}
+          </button>
+        ))}
       </section>
 
       {selectedFilters.length > 0 && (
@@ -160,6 +196,20 @@ export function TemplateDetail({
             比例
           </span>
         </div>
+        <section className="template-flow-strip" aria-label="模板产出流程">
+          <span>
+            <small>输入</small>
+            <strong>{templateInputLabel(template)}</strong>
+          </span>
+          <span>
+            <small>模板</small>
+            <strong>{template.config.workflowLabel}</strong>
+          </span>
+          <span>
+            <small>输出</small>
+            <strong>{templateOutputLabel(template)}</strong>
+          </span>
+        </section>
         <section className="template-contract-panel">
           <header>
             <strong>模板协议</strong>
@@ -249,18 +299,28 @@ function TemplateCard({
       : template.category === '人像写真'
         ? 'is-portrait-template'
         : 'is-image-template'
+  const outputLabel = templateOutputLabel(template)
 
   return (
     <button
       type="button"
-      className={`template-card ${typeClass}`}
+      className={`template-card template-card-premium ${typeClass} ${index < 2 ? 'is-featured' : ''}`}
       style={{ '--template-accent': template.accent, '--card-index': index } as CSSProperties}
       onClick={() => onOpen(template.id)}
     >
       <span className="template-media">
-        <img src={template.image} alt={template.title} />
+        {template.category === '视频模板' && template.videoSrc ? (
+          <video src={template.videoSrc} poster={template.image} autoPlay muted loop playsInline />
+        ) : (
+          <img src={template.image} alt={template.title} />
+        )}
         <span>{template.category}</span>
         <em>{templateInputLabel(template)}</em>
+        {template.category === '视频模板' && (
+          <i className="template-play-badge">
+            <Play size={14} fill="currentColor" />
+          </i>
+        )}
         <i className="template-preview-layer">
           <Play size={17} />
           预览模板
@@ -270,6 +330,11 @@ function TemplateCard({
         <small>{template.scenario}</small>
         <strong>{template.title}</strong>
         <b>{template.description}</b>
+        <span className="template-output-map">
+          <em>{templateInputLabel(template)}</em>
+          <i />
+          <em>{outputLabel}</em>
+        </span>
         <span className="template-meta">
           <em>{template.duration}</em>
           <em>{template.ratio}</em>

@@ -1,7 +1,7 @@
 # Frontend Polish SPEC
 
-Status: Draft for next prototype pass
-Last updated: 2026-06-26
+Status: Superseded by 2026-06-29 page-role refactor baseline
+Last updated: 2026-06-29
 
 This document defines the next frontend-only polish pass. Backend integration is explicitly out of scope for this pass.
 
@@ -23,7 +23,7 @@ In scope:
 
 - Homepage visual and interaction upgrade.
 - Template gallery card and detail upgrade.
-- `工作台 / 制作视频` visual simplification and premium treatment.
+- `生产台 / 创作台` visual simplification and premium treatment.
 - `我的 / 资产库` management experience upgrade.
 - Motion system cleanup across pages, cards, modal, drawer, sheet, lightbox, and toast.
 - Empty, loading, success, warning, and disabled states.
@@ -151,7 +151,7 @@ Acceptance:
 - Filtering `视频模板` reveals video-input templates.
 - Opening a video-input template clearly indicates that video creation is handled by a later dedicated workspace.
 
-### 4.3 工作台 / 制作视频
+### 4.3 生产台 / 创作台
 
 Purpose:
 
@@ -173,8 +173,8 @@ Required changes:
   - advanced settings entry;
   - frozen credit state;
   - generate button.
-- Treat `工作台 / 制作视频` as an operation console rather than a long content page. It should fit the primary creation controls into one desktop viewport where possible.
-- Reduce visual noise in the workbench and creation state. Avoid too many equal-weight chips, cards, and status blocks competing with the main input and generation action.
+- Treat `生产台 / 创作台` as an operation console rather than a long content page. It should fit the primary creation controls into one desktop viewport where possible.
+- Reduce visual noise in the production desk and creation state. Avoid too many equal-weight chips, cards, and status blocks competing with the main input and generation action.
 - Improve selected asset state:
   - Source: asset library or uploaded file.
   - Retention/expiry.
@@ -213,7 +213,7 @@ Acceptance:
 
 - A user can start generation from the page without reading instructions.
 - On desktop, the first image-only creation flow should keep input preview, image actions, credit state, and generate action visible without repeated downward scrolling.
-- The workbench should not feel visually crowded; secondary operational information should be grouped, collapsed, or moved out of the main creation path.
+- The production desk should not feel visually crowded; secondary operational information should be grouped, collapsed, or moved out of the main creation path.
 - Removing the selected image disables generation.
 - Selecting or uploading an image restores generation readiness.
 - Advanced settings are visible but not front-stage.
@@ -459,7 +459,7 @@ Before considering this polish pass done:
 - Do not start backend work yet.
 - Keep image-only generation as the first complete demo flow.
 - Keep video-input templates visible but creation reserved.
-- Keep `工作台` as the production surface.
+- Keep `生产台` as the production surface.
 - Keep `首页` as the public product entry.
 - Keep `我的` as account and asset management.
 - Keep advanced settings focused on output parameters only.
@@ -470,7 +470,7 @@ Before considering this polish pass done:
 Completed in this pass:
 
 - Removed remaining user-facing prototype/reserved/placeholder wording.
-- Changed workbench `开始制作` to enter `工作台 / 制作视频` directly.
+- Changed production-desk `开始制作` to enter `生产台 / 创作台` directly.
 - Added real autoplay muted loop preview for video-input template detail.
 - Kept video-input template creation disabled with production wording: `视频制作暂未开放`.
 - Hid task developer controls from normal task detail.
@@ -480,12 +480,12 @@ Completed in this pass:
   - assign an asset to a category;
   - show the same category set in creation asset picker.
 - Renamed creation actions from generic `查看 / 移除` to `预览图片 / 移除图片`.
-- Compressed desktop workbench spacing so the core panels sit closer to one viewport.
+- Compressed desktop production-desk spacing so the core panels sit closer to one viewport.
 - Converted mobile template cards to compact media-list cards.
 - Converted mobile asset management cards to compact management-list cards.
 - Reduced mobile account card and asset summary height.
 - Split `我的` into three tabs: `资产`, `积分`, and `账号`, so asset management, recharge ledger, and login/register do not stack into one long page.
-- Changed creation submission to a background-task flow: after `生成视频`, the user stays in `工作台 / 制作视频`, credits are frozen, Toast confirms submission, and a compact background task strip links to the task detail drawer.
+- Changed creation submission to a background-task flow: after `生成视频`, the user stays in `生产台 / 创作台`, credits are frozen, Toast confirms submission, and a compact background task strip links to the task detail drawer.
 - Added duplicate-submit protection for the same image, template, and output parameters. The generate button becomes `后台生成中`; changing advanced settings re-enables generation as a variant.
 - Added a clear `完成设置` action inside advanced settings so parameter editing does not block the submit area.
 - Refined the creation asset picker with a current-input summary, usable-image count, preview-only count, counted category filters, selected-state marker, and clearer `选择图片 / 当前使用 / 仅可预览` actions.
@@ -513,7 +513,7 @@ Measured verification:
 - `npm run lint` passes.
 - `npm run build` passes.
 - Desktop creation page fits the main controls in one viewport at 1365x820.
-- Desktop background-task submit keeps `工作台 / 制作视频` active, opens task detail as a drawer, and does not navigate to `任务`.
+- Desktop background-task submit keeps `生产台 / 创作台` active, opens task detail as a drawer, and does not navigate to `任务`.
 - Desktop duplicate-submit guard works: first submit changes the button to `后台生成中`, changing duration to `10s` re-enables `生成视频`, and the variant submit increases active background tasks to 3.
 - Mobile background-task submit keeps the creation page active at 390x844, with page height about 1021px and no horizontal overflow.
 - Mobile duplicate-submit guard keeps the creation page active at 390x844, with page height about 1042px and no horizontal overflow.
@@ -528,6 +528,28 @@ Measured verification:
 - Mobile `我的` tab heights at 390x844: `资产` about 1578px, `积分` about 1478px, `账号` about 1173px.
 - No horizontal overflow found in reviewed desktop/mobile paths.
 - Browser console did not report application errors during reviewed paths.
+
+## 14. 2026-06-29 Page-Role Refactor Pass
+
+Completed in this pass:
+
+- Rebuilt homepage as a public product entry rather than a mixed product/dashboard page.
+- Renamed the visible logged-in production surface from `工作台` to `生产台`.
+- Rebuilt production desk around create entry, current background task, recent assets, credit state, and short template lane.
+- Kept the creation surface as the image-only `创作台`, with submission remaining in place while tasks run in the background.
+- Rebuilt task page as `任务追踪`, with current task focus, lifecycle strip, and all records.
+- Rebuilt my page as `资源与账号`, with asset library, credit center, and account security side sections.
+- Added global page width constraints and mobile single-column rules for the refactored pages.
+- Updated [frontend-premium-ux-redesign-spec.md](./frontend-premium-ux-redesign-spec.md), [frontend-prototype-review.md](./frontend-prototype-review.md), and [SPEC.md](./SPEC.md) to match the current page roles.
+
+Measured verification:
+
+- `npm run lint` passes.
+- `npm run build` passes.
+- Desktop homepage, production desk, template page, task page, my page, and creation surface have no horizontal overflow.
+- Desktop creation surface fits the 1280px by 720px viewport.
+- Mobile 390px homepage, production desk, template page, task page, and my page have no horizontal overflow.
+- Submitting `生成视频` keeps the user in the creation surface and shows a background task.
 
 Remaining optional polish:
 

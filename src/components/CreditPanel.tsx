@@ -1,15 +1,15 @@
 import { AlertTriangle, CheckCircle2, QrCode, TimerReset, Wallet } from 'lucide-react'
 import { useState } from 'react'
 
-import { rechargePackages } from '../prototypeData'
-import type { LedgerRow, LedgerStatus, PaymentOrder, PaymentOrderStatus, ToastState } from '../types'
+import type { LedgerRow, LedgerStatus, PaymentOrder, PaymentOrderStatus, RechargePackage, ToastState } from '../types'
 
 type CreditPanelProps = {
   balance: number
   frozenCredits: number
   ledgerRows: LedgerRow[]
   paymentOrder: PaymentOrder
-  onCreatePaymentOrder: (pack: (typeof rechargePackages)[number]) => void
+  packages: RechargePackage[]
+  onCreatePaymentOrder: (pack: RechargePackage) => void
   onResolvePaymentOrder: (status: Extract<PaymentOrderStatus, 'paid' | 'failed' | 'cancelled' | 'expired'>) => void
   onToast: (toast: ToastState) => void
 }
@@ -44,11 +44,13 @@ export function CreditPanel({
   frozenCredits,
   ledgerRows,
   paymentOrder,
+  packages,
   onCreatePaymentOrder,
   onResolvePaymentOrder,
   onToast,
 }: CreditPanelProps) {
-  const [selectedPackage, setSelectedPackage] = useState(rechargePackages[1])
+  const [selectedPackageName, setSelectedPackageName] = useState(() => packages[1]?.name ?? packages[0]?.name ?? '')
+  const selectedPackage = packages.find((pack) => pack.name === selectedPackageName) ?? packages[0]
   const totalCredits = balance + frozenCredits
   const frozenLedgerCount = ledgerRows.filter((row) => row.status === 'frozen').length
   const hasPendingOrder = paymentOrder.status === 'pending'
@@ -80,13 +82,13 @@ export function CreditPanel({
         </span>
       </section>
       <div className="package-grid">
-        {rechargePackages.map((pack) => (
+        {packages.map((pack) => (
           <button
             type="button"
-            className={selectedPackage.name === pack.name ? 'package-card is-selected' : 'package-card'}
+            className={selectedPackage?.name === pack.name ? 'package-card is-selected' : 'package-card'}
             key={pack.name}
             onClick={() => {
-              setSelectedPackage(pack)
+              setSelectedPackageName(pack.name)
               onToast({ title: '充值包已选择', text: `${pack.name} 可继续完成支付。` })
             }}
           >
@@ -99,8 +101,8 @@ export function CreditPanel({
       <button
         type="button"
         className="primary-action recharge-action"
-        disabled={hasPendingOrder}
-        onClick={() => onCreatePaymentOrder(selectedPackage)}
+        disabled={hasPendingOrder || !selectedPackage}
+        onClick={() => selectedPackage && onCreatePaymentOrder(selectedPackage)}
       >
         <Wallet size={18} />
         {hasPendingOrder ? '订单待支付' : '创建支付订单'}

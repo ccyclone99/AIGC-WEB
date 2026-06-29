@@ -5,27 +5,41 @@ Last updated: 2026-06-26
 
 This document defines the frontend-to-backend boundary that must be stable before backend implementation starts.
 
-Use [backend-api-contract.md](./backend-api-contract.md) for the endpoint and DTO table derived from this prep document.
+Use [backend-api-contract.md](./backend-api-contract.md) for the endpoint and DTO table derived from this prep document, [backend-integration-sequence.md](./backend-integration-sequence.md) for the replacement order, [backend-first-replacement-checklist.md](./backend-first-replacement-checklist.md) for the first backend handoff slice, and [backend-readiness-audit.md](./backend-readiness-audit.md) for the current start/no-start decision.
 
 ## Current Frontend Source Boundaries
 
 - `src/types.ts`: shared UI/domain types that should guide initial API DTO names, including template, task, asset, ledger, payment order, upload receipt, and signup risk states.
+- `src/api/contracts.ts`: frontend API adapter port and DTO contracts for auth, templates, assets, generation tasks, credits, and payments.
+- `src/api/mappers.ts`: DTO-to-UI mappers for backend timestamps, expiry labels, generation input snapshots, ledger rows, assets, payments, QR sessions, and upload receipts.
+- `src/api/client.ts`: API client factory that can return the local prototype client or the HTTP client.
+- `src/api/config.ts`: environment-driven API client entry using `VITE_AIGC_API_MODE` and `VITE_AIGC_API_BASE_URL`.
+- `src/api/httpClient.ts`: HTTP implementation of `AigcApiClient` using the endpoint paths in `backend-api-contract.md`.
+- `src/api/prototypeClient.ts`: local fallback implementation of `AigcApiClient` backed by prototype seed data.
 - `src/prototypeData.ts`: current local seed data for templates, assets, tasks, credit packages, payment order, upload receipt, signup risk checks, filters, and ledger rows.
+- `src/hooks/usePrototypeStore.ts`: current local prototype state and mutation boundary for navigation, templates, assets, uploads, generation tasks, credits, payments, auth, and overlays. This is the first replacement point for an API-backed store.
 - `src/domain.ts`: pure frontend business helpers for template input labels, output defaults, asset eligibility, category filtering, and duplicate output comparison.
 - `src/viewModels.ts`: shared user-facing copy for task state, credit state, QR login state, signup reward, risk status, failure labels, and asset empty states. Backend state enums should map here first during API integration.
 - `src/components/AuthPanel.tsx`: login/register, QR login state, signup reward, and signup risk checks.
 - `src/components/AssetPicker.tsx`: creation asset picker, category filtering, usable/preview-only asset handling, and upload receipt actions.
 - `src/components/CreditPanel.tsx`: credit balance, payment order lifecycle, package selection, and ledger rows.
-- `src/components/MeView.tsx`: personal space page that composes asset management, credit center entry, account login/register, QR login, signup reward, and custom asset categories.
+- `src/components/HomeView.tsx`: first-viewport product positioning, primary entry points, and use-case routing for the public website surface.
+- `src/components/MeView.tsx`: thin personal-space shell that owns tab selection and composes asset, credit, and account panels.
+- `src/components/AssetManager.tsx`: user asset library management, upload receipt handling, category CRUD, archive/restore, reuse, download, and expiring asset states.
+- `src/components/AccountPanel.tsx`: account login/register surface, QR login, signup reward, and account security/binding summary.
+- `src/components/TopBar.tsx`: application-level navigation, credit entry, and account entry shell.
+- `src/components/OverlayPrimitives.tsx`: shared modal, drawer, sheet, lightbox, and toast primitives used by the prototype overlays.
+- `src/components/AppOverlays.tsx`: overlay content orchestration for template detail, task detail, credits, auth, filters, asset picker, preview, and toast.
 - `src/components/PageTitle.tsx`: shared page title block for page-level views.
 - `src/components/StudioPage.tsx`: first image-only creation console, including selected asset state, output settings, duplicate active-task guard, estimated credit freeze copy, submit readiness, and background task summary.
 - `src/components/TaskDetail.tsx`: task traceability, task failure details, credit state, and output asset actions.
 - `src/components/TasksView.tsx`: task list page, task lifecycle summary, and task row credit/status presentation.
 - `src/components/TemplatesView.tsx`: template gallery, template detail contract view, video-template support state, and template filter sheet content.
 - `src/components/UploadReceiptPanel.tsx`: upload receipt status, retry, and cancel UI.
-- `src/App.tsx`: page composition, local prototype state, generation task creation, overlays, and remaining page-level components.
+- `src/components/WorkbenchView.tsx`: visible `生产台` production hub, creation entry, running task summary, recent assets, and credit status entry.
+- `src/App.tsx`: thin page composition shell that wires the prototype store into page components and overlays.
 
-Backend integration should replace `src/prototypeData.ts` and local state mutations gradually. It should not require rewriting page components first.
+Backend integration should switch `src/api/config.ts` from prototype mode to HTTP mode behind `VITE_AIGC_API_MODE`, route responses through `src/api/mappers.ts`, then replace `src/prototypeData.ts` and `src/hooks/usePrototypeStore.ts` gradually. It should not require rewriting page components first.
 
 ## API Groups Needed
 
@@ -221,11 +235,12 @@ Backend work should start only when these are true:
 - credit/payment states have stable user-facing language;
 - one backend-ready API contract exists for templates, assets, tasks, and credits.
 
-Current status: not ready for backend. The code has started the required module split, extracted auth/payment/asset-picker/studio/task-detail panels, and made QR login, signup reward, upload, task failure, payment order, template, asset, credit, and generation idempotency concepts explicit enough to continue API contract hardening.
+Current status: ready for the first read-only backend slice, but not ready for mutation-heavy backend work. The code has completed the first required module split, extracted home/production-desk/account/asset/auth/payment/asset-picker/studio/task-detail panels, isolated overlay orchestration, moved local prototype mutations into a hook boundary, and added a typed frontend API adapter with prototype and HTTP clients. Read-only templates, credit summary/packages/ledger, tasks, assets, asset categories, reward campaigns, and session state can now be integrated behind `VITE_AIGC_API_MODE=http`.
 
 Immediate frontend boundary work before backend:
 
-- split the remaining page-level components out of `src/App.tsx`, especially homepage and workbench overview;
-- consider splitting `src/components/MeView.tsx` further into `AssetManager`, `AccountPanel`, and a thin account page shell before the real asset/auth APIs land;
+- keep `src/App.tsx` as a thin composition shell;
+- start with the read-only backend slice described in `docs/backend-first-replacement-checklist.md`;
+- delay generation, upload, payment, and reward-claim mutations until backend stack, database, secret strategy, object storage, payment provider, and provider mock behavior are selected;
 - continue routing status copy through `src/viewModels.ts` so API enum changes are localized;
 - add browser-level smoke coverage for the first image-only creation loop, asset picker, task detail, credit order, and account reward states.

@@ -34,6 +34,7 @@ export function AssetPicker({
   const usableAssetCount = assets.filter(canUseAssetForGeneration).length
   const previewOnlyCount = assets.filter((asset) => asset.status === 'library' && !canUseAssetForGeneration(asset)).length
   const getFilterCount = (filter: AssetFilter) => assets.filter((asset) => filterAssetByCategory(asset, filter)).length
+  const visibleAssetFilters = assetFilters.filter((filter) => filter === '全部' || getFilterCount(filter) > 0)
   const visibleAssets = assets
     .filter((asset) => filterAssetByCategory(asset, assetFilter))
     .sort((a, b) => Number(canUseAssetForGeneration(b)) - Number(canUseAssetForGeneration(a)))
@@ -54,34 +55,30 @@ export function AssetPicker({
         <span>{usableAssetCount} 个图片素材可用于当前模板</span>
       </header>
 
-      <section className="asset-picker-current">
-        <div>
+      <section className="asset-picker-status-strip">
+        <span>
           <CheckCircle2 size={17} />
-          <span>
-            <small>当前输入</small>
-            <strong>{selectedAsset?.name ?? '还未选择图片'}</strong>
-          </span>
-        </div>
-        <div>
+          <strong>当前</strong>
+          <em>{selectedAsset?.name ?? '未选择图片'}</em>
+        </span>
+        <span>
           <Images size={17} />
-          <span>
-            <small>可生成</small>
-            <strong>{usableAssetCount} 个图片</strong>
-          </span>
-        </div>
-        <div>
+          <strong>可生成</strong>
+          <em>{usableAssetCount} 个图片</em>
+        </span>
+        <span>
           <Play size={17} />
-          <span>
-            <small>仅预览</small>
-            <strong>{previewOnlyCount} 个素材</strong>
-          </span>
-        </div>
+          <strong>仅预览</strong>
+          <em>{previewOnlyCount} 个素材</em>
+        </span>
       </section>
 
-      <UploadReceiptPanel receipt={uploadReceipt} onCancel={onCancelUpload} onRetry={onRetryUpload} />
+      {uploadReceipt.status !== 'idle' && (
+        <UploadReceiptPanel receipt={uploadReceipt} onCancel={onCancelUpload} onRetry={onRetryUpload} />
+      )}
 
       <div className="asset-picker-filters" aria-label="资产分类">
-        {assetFilters.map((filter) => (
+        {visibleAssetFilters.map((filter) => (
           <button
             type="button"
             key={filter}

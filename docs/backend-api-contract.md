@@ -5,6 +5,8 @@ Last updated: 2026-06-26
 
 This document turns the frontend prototype state into a backend API contract. It should be used after `backend-interface-prep.md` and before creating backend routes.
 
+The matching frontend TypeScript adapter port lives in `src/api/contracts.ts`; DTO-to-UI conversion lives in `src/api/mappers.ts`.
+
 ## Conventions
 
 - Base path: `/api`
@@ -36,6 +38,8 @@ type ApiResponse<T> = {
 | `POST` | `/auth/qr-sessions/:sessionId/confirm` | Provider/mobile confirmation callback | `confirmed` or `rejected` |
 | `POST` | `/auth/third-party/:provider/start` | Start OAuth/third-party login | third-party login entry |
 | `POST` | `/auth/signup-reward/claim` | Claim signup bonus | `eligible`, `granted`, `claimed`, `risk_blocked` |
+| `GET` | `/reward-campaigns` | List activity reward campaigns | activity/reward entry |
+| `POST` | `/reward-campaigns/:campaignId/claim` | Claim campaign credits | reward ledger row |
 
 ```ts
 type QrLoginSessionDto = {
@@ -57,6 +61,18 @@ type SignupRewardDto = {
     value: string
     note: string
   }>
+}
+
+type RewardCampaignDto = {
+  id: string
+  title: string
+  status: 'available' | 'claimed' | 'risk_blocked' | 'expired' | 'disabled'
+  rewardCredits: number
+  startsAt: string
+  endsAt?: string
+  claimLimit: number
+  claimedCount: number
+  riskChecks: SignupRewardDto['riskChecks']
 }
 ```
 
@@ -115,6 +131,9 @@ Open before backend:
 | Method | Path | Purpose | Frontend state |
 |---|---|---|---|
 | `GET` | `/assets` | List user assets | asset library, asset picker |
+| `GET` | `/asset-categories` | List system and user categories | asset filter/category manager |
+| `POST` | `/asset-categories` | Create user category | asset category manager |
+| `DELETE` | `/asset-categories/:categoryId` | Delete user category and move assets to default | asset category manager |
 | `POST` | `/assets/uploads` | Create upload receipt/presigned upload target | upload receipt `validating` |
 | `POST` | `/assets/uploads/:uploadId/complete` | Finalize uploaded file into asset | `saved`, `rejected`, `failed` |
 | `POST` | `/assets/uploads/:uploadId/cancel` | Cancel upload | `cancelled` |
@@ -134,6 +153,14 @@ type AssetDto = {
   expiresLabel: string
   status: 'library' | 'archived'
   source: string
+}
+
+type AssetCategoryDto = {
+  id: string
+  name: string
+  scope: 'system' | 'user'
+  assetCount: number
+  createdAt: string
 }
 
 type UploadReceiptDto = {
@@ -158,7 +185,7 @@ Open before backend:
 | Method | Path | Purpose | Frontend state |
 |---|---|---|---|
 | `POST` | `/generation-tasks` | Create generation task and freeze credits atomically | background task strip |
-| `GET` | `/generation-tasks` | List user tasks | task page, workbench queue |
+| `GET` | `/generation-tasks` | List user tasks | task page, production-desk queue |
 | `GET` | `/generation-tasks/:taskId` | Fetch traceable task detail | task drawer |
 | `POST` | `/generation-tasks/:taskId/cancel` | Cancel active task if allowed | future cancel action |
 | `POST` | `/generation-tasks/:taskId/retry` | Retry with same snapshot or new idempotency key | future retry action |
