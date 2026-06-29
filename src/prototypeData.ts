@@ -340,7 +340,7 @@ export const initialTasks: Task[] = [
       stage: 'provider',
       code: 'PROVIDER_502_RETRY_EXHAUSTED',
       retryable: true,
-      message: '主供应商返回异常，重试仍未成功，冻结积分已释放。',
+      message: '生成服务暂时异常，冻结积分已释放。',
     },
     params: {
       templateId: 'beauty',
@@ -368,7 +368,7 @@ export const initialTasks: Task[] = [
       stage: 'moderation',
       code: 'MODERATION_RIGHTS_REVIEW_BLOCKED',
       retryable: false,
-      message: '素材或输出命中权利/合规复核规则，系统释放冻结积分。',
+      message: '素材需要重新确认授权，系统已释放冻结积分。',
     },
     params: {
       templateId: 'bag',
@@ -482,14 +482,14 @@ export const initialLedgerRows: LedgerRow[] = [
   },
   {
     id: 'L-240625-001B',
-    title: '包袋任务审核释放',
+    title: '包袋任务积分释放',
     amount: '+176',
-    source: '审核阻断',
+    source: '内容确认',
     kind: 'release',
     status: 'released',
     refId: 'T-240625-016',
     time: '1 小时前',
-    note: '内容审核阻断，冻结积分已释放回可用余额。',
+    note: '素材需要重新确认授权，冻结积分已释放回可用余额。',
   },
   {
     id: 'L-240625-001A',
@@ -511,7 +511,7 @@ export const initialLedgerRows: LedgerRow[] = [
     status: 'granted',
     refId: 'CAMPAIGN-SIGNUP',
     time: '今天',
-    note: '注册活动赠送积分，受风控和活动规则约束。',
+    note: '注册活动赠送积分，每个账号限领一次。',
   },
 ]
 
@@ -532,30 +532,30 @@ export const initialPaymentOrder: PaymentOrder = {
   channel: '微信/支付宝',
   createdAt: '待创建',
   expiresIn: '15 分钟',
-  note: '选择充值包后创建支付订单，支付成功才写入积分流水。',
+  note: '选择充值包后创建支付订单，支付完成后积分到账。',
 }
 
 export const signupRiskChecks: SignupRiskCheck[] = [
   {
     id: 'device',
-    label: '设备',
+    label: '账号',
     status: 'pass',
-    value: '未命中重复设备',
-    note: '同设备多账号领取会进入复核。',
+    value: '可领取',
+    note: '每个账号限领一次活动积分。',
   },
   {
     id: 'ip',
-    label: 'IP',
+    label: '活动',
     status: 'review',
-    value: '短期注册偏高',
-    note: '超过阈值时仅允许登录，不发放活动积分。',
+    value: '规则校验中',
+    note: '活动积分按页面规则发放。',
   },
   {
     id: 'phone',
     label: '手机号',
     status: 'pass',
     value: '可领取',
-    note: '手机号、设备、支付行为共同参与活动判断。',
+    note: '部分活动可能需要完成手机号验证。',
   },
 ]
 
@@ -565,7 +565,7 @@ export const initialUploadReceipt: UploadReceipt = {
   status: 'idle',
   progress: 0,
   source: '资产库',
-  message: '上传图片会生成资产记录，并保留请求编号用于追溯。',
+  message: '上传图片会自动加入资产库。',
 }
 
 export const initialQrLoginSession: QrLoginSession = {

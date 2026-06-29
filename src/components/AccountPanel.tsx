@@ -55,7 +55,7 @@ export function AccountPanel({
             第三方账号
           </span>
         </div>
-        <p>注册赠送积分会叠加设备、IP、手机号、支付行为和活动规则，防止重复领取。</p>
+        <p>注册赠送积分每个账号限领一次，部分活动可能需要完成手机号验证。</p>
       </div>
     </section>
   )

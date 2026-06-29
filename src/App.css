@@ -7209,7 +7209,13 @@ summary:focus-visible {
   }
 
   .template-mode-strip {
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .template-mode-strip button {
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
   }
 
   .template-insight-strip {
@@ -7260,19 +7266,28 @@ summary:focus-visible {
   }
 
   .asset-picker-status-strip span {
+    flex: 1 1 100%;
+    min-width: 0;
     flex-basis: 168px;
     min-height: 36px;
     padding: 0 8px;
   }
 
+  .asset-picker-status-strip {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
   .asset-picker-filters {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .asset-picker-filters button {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    justify-content: center;
+    max-width: 100%;
   }
 
   .asset-picker-upload {

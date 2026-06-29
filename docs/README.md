@@ -14,6 +14,7 @@ This directory contains the current product, architecture, and implementation pl
 
 - [frontend-ux-direction.md](./frontend-ux-direction.md): user-facing website and page structure.
 - [frontend-polish-spec.md](./frontend-polish-spec.md): next frontend-only visual, interaction, and responsive polish pass.
+- [customer-demo-cleanup-spec.md](./customer-demo-cleanup-spec.md): customer-facing cleanup rules before sharing the online demo.
 - [frontend-premium-ux-redesign-spec.md](./frontend-premium-ux-redesign-spec.md): premium page-role refactor, creation studio, video-native gallery, and production-loop SPEC.
 - [mainstream-design-research-and-ui-proposal.md](./mainstream-design-research-and-ui-proposal.md): mainstream competitor research and complete UI proposal.
 - [motion-prototype-plan.md](./motion-prototype-plan.md): card flip, hover preview, bento, before/after, and transition prototypes.

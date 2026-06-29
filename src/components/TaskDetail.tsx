@@ -2,22 +2,18 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
-  ClipboardCheck,
   Coins,
   Download,
   FileVideo,
   Library,
-  LockKeyhole,
   Play,
-  RefreshCcw,
   ShieldCheck,
   TimerReset,
   Zap,
 } from 'lucide-react'
 
-import { activeStatuses, showTaskDevControls } from '../prototypeData'
 import type { Task, TaskStatus } from '../types'
-import { failureReasonLabel, failureStageLabel, taskCreditState, taskStatusCopy } from '../viewModels'
+import { taskCreditState, taskStatusCopy } from '../viewModels'
 
 type TaskDetailProps = {
   task: Task
@@ -41,83 +37,48 @@ const taskStatusIcon = (status: TaskStatus) => {
   return iconMap[status]
 }
 
+const customerFailureMessage = (task: Task) => {
+  if (!task.failure) return ''
+
+  if (task.failure.reason === 'asset_invalid') {
+    return '图片清晰度或画面质量不足，本次未消耗积分。请更换更清晰的商品图后重新生成。'
+  }
+
+  if (task.failure.reason === 'moderation_block') {
+    return '素材需要重新确认授权或内容合规，本次积分已退回。请更换素材后再试。'
+  }
+
+  if (task.failure.reason === 'timeout') {
+    return '生成等待时间过长，系统已自动退回积分。你可以稍后重新提交。'
+  }
+
+  return '生成服务暂时异常，系统已退回本次冻结积分。你可以稍后重新生成。'
+}
+
 export function TaskDetail({
   task,
-  onAdvance,
   onDownload,
   onOpenAssets,
   onPreview,
-  onRefund,
 }: TaskDetailProps) {
   const status = taskStatusCopy(task.status)
   const StatusIcon = taskStatusIcon(task.status)
-  const canOperate = activeStatuses.includes(task.status)
   const isSuccess = task.status === 'success'
   const isRefunded = task.status === 'refunded'
   const creditState = taskCreditState(task)
-  const paramRows = task.params
+  const settingRows = task.params
     ? [
-        { label: '模板 ID', value: task.params.templateId },
-        { label: '模板版本', value: task.params.templateVersion },
-        { label: '价格版本', value: task.params.pricingVersion },
-        { label: '工作流', value: task.params.workflowType },
-        { label: '输入资产', value: task.params.imageId },
-        { label: '幂等键', value: task.params.idempotencyKey },
         { label: '画面比例', value: task.params.ratio },
         { label: '视频长度', value: task.params.duration },
-        { label: '图片分辨率', value: task.params.resolution },
-        { label: '清晰度', value: task.params.quality },
+        { label: '清晰度', value: task.params.resolution },
+        { label: '画质', value: task.params.quality },
       ]
     : [
-        { label: '模板 ID', value: 'templateId' },
-        { label: '模板版本', value: 'templateVersion' },
-        { label: '价格版本', value: 'pricingVersion' },
-        { label: '工作流', value: 'workflowType' },
-        { label: '输入资产', value: 'productImage' },
-        { label: '幂等键', value: 'idempotencyKey' },
-        { label: '画面比例', value: 'ratio' },
-        { label: '视频长度', value: 'duration' },
-        { label: '图片分辨率', value: 'resolution' },
-        { label: '清晰度', value: 'quality' },
+        { label: '画面比例', value: '-' },
+        { label: '视频长度', value: '-' },
+        { label: '清晰度', value: '-' },
+        { label: '画质', value: '-' },
       ]
-  const auditRows = [
-    {
-      icon: ClipboardCheck,
-      label: '提交记录',
-      value: `${task.id} · ${task.updated}`,
-      detail: '提交参数已锁定，支持客服和运营排查。',
-    },
-    {
-      icon: LockKeyhole,
-      label: '模板版本',
-      value: task.params ? `${task.params.templateVersion} · ${task.params.pricingVersion}` : 'templateVersion · pricingVersion',
-      detail: '模板、价格和输出参数随任务保存。',
-    },
-    {
-      icon: Coins,
-      label: '积分流水',
-      value: creditState.label,
-      detail: creditState.text,
-    },
-    {
-      icon: Zap,
-      label: '供应商尝试',
-      value: isRefunded ? '失败或阻断' : isSuccess ? '主供应商成功' : '主供应商处理中',
-      detail: '请求参数、响应摘要和错误码会进入任务记录。',
-    },
-    {
-      icon: FileVideo,
-      label: '渲染记录',
-      value: isSuccess ? '输出已生成' : isRefunded ? '无可用输出' : '等待生成完成',
-      detail: '后期合成、封面和资源入库形成独立记录。',
-    },
-    {
-      icon: ShieldCheck,
-      label: '审核与兜底',
-      value: isRefunded ? '已释放积分' : '规则校验通过',
-      detail: '失败、超时或审核阻断会自动释放冻结积分。',
-    },
-  ]
 
   return (
     <div className="drawer-stack">
@@ -129,7 +90,7 @@ export function TaskDetail({
             {status.label}
           </em>
           <h2>{task.title}</h2>
-          <span>{task.id} · {task.cost} 积分</span>
+          <span>{task.cost} 积分 · {task.updated}</span>
         </div>
       </section>
       <div className="progress-track">
@@ -147,39 +108,18 @@ export function TaskDetail({
           <small>{status.detail}</small>
         </span>
         <span>
-          <ClipboardCheck size={17} />
-          <strong>可追溯</strong>
-          <small>提交参数、模板版本和积分流水已锁定。</small>
+          <ShieldCheck size={17} />
+          <strong>记录已保存</strong>
+          <small>生成设置和积分状态会保留在记录中。</small>
         </span>
-      </section>
-      <section className="task-audit-panel">
-        <header>
-          <span>
-            <strong>追溯记录</strong>
-            <small>提交、积分、供应商、渲染和审核记录保持同一任务链路。</small>
-          </span>
-          <em>{task.id}</em>
-        </header>
-        <div className="task-audit-grid">
-          {auditRows.map(({ icon: Icon, label, value, detail }) => (
-            <article key={label}>
-              <Icon size={17} />
-              <span>
-                <small>{label}</small>
-                <strong>{value}</strong>
-                <em>{detail}</em>
-              </span>
-            </article>
-          ))}
-        </div>
       </section>
       <section className="task-param-panel">
         <header>
-          <strong>提交参数</strong>
-          <small>这些字段会作为后端任务参数快照保存。</small>
+          <strong>生成设置</strong>
+          <small>这些设置会随作品记录保存，方便下次复用。</small>
         </header>
         <div className="task-param-grid">
-          {paramRows.map((row) => (
+          {settingRows.map((row) => (
             <span key={row.label}>
               <small>{row.label}</small>
               <strong>{row.value}</strong>
@@ -192,25 +132,10 @@ export function TaskDetail({
           <header>
             <span>
               <AlertTriangle size={17} />
-              <strong>失败原因</strong>
+              <strong>生成未完成</strong>
             </span>
-            <em>{task.failure.code}</em>
           </header>
-          <div className="task-failure-grid">
-            <span>
-              <small>阶段</small>
-              <strong>{failureStageLabel(task.failure.stage)}</strong>
-            </span>
-            <span>
-              <small>原因</small>
-              <strong>{failureReasonLabel(task.failure.reason)}</strong>
-            </span>
-            <span>
-              <small>可重试</small>
-              <strong>{task.failure.retryable ? '可以' : '不建议'}</strong>
-            </span>
-          </div>
-          <p>{task.failure.message}</p>
+          <p>{customerFailureMessage(task)}</p>
         </section>
       )}
       {isSuccess && (
@@ -223,8 +148,8 @@ export function TaskDetail({
             </span>
           </button>
           <div>
-            <p className="eyebrow">OUTPUT READY</p>
-            <strong>{task.id.toLowerCase()}-output.mp4</strong>
+            <p className="eyebrow">作品已生成</p>
+            <strong>{task.title}.mp4</strong>
             <small>{task.cost} 积分已结算 · 资产库已保存 · 30 天保留</small>
             <div className="task-result-meta">
               <span>
@@ -258,28 +183,16 @@ export function TaskDetail({
           <AlertTriangle size={19} />
           <span>
             <strong>积分已释放</strong>
-            <small>本次失败不会消耗积分。历史输入、模板版本和参数仍保留，后续可以用于客服排查或重新生成。</small>
+            <small>本次失败不会消耗积分。你可以更换图片或调整设置后重新生成。</small>
             <div className="task-recovery-steps">
               <em>积分退回</em>
-              <em>参数保留</em>
+              <em>设置保留</em>
               <em>可重新提交</em>
             </div>
           </span>
         </section>
       )}
       <div className="drawer-actions">
-        {showTaskDevControls && canOperate && (
-          <button type="button" className="primary-action" onClick={() => onAdvance(task.id)}>
-            <RefreshCcw size={18} />
-            推进状态
-          </button>
-        )}
-        {showTaskDevControls && canOperate && (
-          <button type="button" className="secondary-action" onClick={() => onRefund(task.id)}>
-            <AlertTriangle size={18} />
-            失败释放积分
-          </button>
-        )}
         <button type="button" className="secondary-action" disabled={task.status !== 'success'} onClick={onPreview}>
           <Play size={18} />
           预览结果

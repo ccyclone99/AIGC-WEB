@@ -76,14 +76,14 @@ export function StudioPage({
   const submitHint = !hasSelectedAsset
     ? '选择商品图后即可提交生成。'
     : duplicateTask
-      ? '当前图片和参数正在后台生成。换图，或调整高级设置生成变体。'
+      ? '当前图片和设置正在生成中。换图，或调整高级设置生成新版本。'
     : hasEnoughCredits
-      ? `${settingSummary} · 预冻结后进入后台，失败或超时自动释放。`
+      ? `${settingSummary} · 提交后自动生成，失败或超时自动释放积分。`
       : `可用 ${creditBalance} 积分，还差 ${totalCost - creditBalance} 积分。`
   const submitLabel = !hasSelectedAsset
     ? '选择图片后生成'
     : duplicateTask
-      ? '后台生成中'
+      ? '生成中'
       : hasEnoughCredits
         ? '生成视频'
         : '积分不足，去充值'
@@ -94,9 +94,9 @@ export function StudioPage({
       <section className="make-simple-card make-console-card" style={{ '--template-accent': template.accent } as CSSProperties}>
         <header className="make-simple-head make-console-head studio-editor-head">
           <div className="make-console-title">
-            <p className="eyebrow">CURRENT SESSION</p>
+            <p className="eyebrow">创作台</p>
             <h1>商品视频制作</h1>
-            <span>上传一张商品图，确认参数后提交到后台队列。</span>
+            <span>上传一张商品图，确认画面设置后提交生成。</span>
           </div>
           <div className="make-template-chip">
             <PackageCheck size={17} />
@@ -140,7 +140,7 @@ export function StudioPage({
             <div className="studio-stage-footer">
               <span>
                 <ClipboardCheck size={15} />
-                素材、参数、积分会写入同一任务链路
+                素材、设置和积分记录会自动保存
               </span>
               <em>{hasSelectedAsset ? selectedAsset?.source : '等待素材'}</em>
             </div>
@@ -157,7 +157,7 @@ export function StudioPage({
                   {selectedAsset ? '已就绪' : '未选择'}
                 </em>
               </div>
-              <p>图片可来自资产库，也可以直接上传；提交后参数会写入任务记录。</p>
+              <p>图片可来自资产库，也可以直接上传；提交后会保存到生成记录。</p>
               <div className="studio-asset-state make-asset-state">
                 <span>
                   <Images size={15} />
@@ -169,7 +169,7 @@ export function StudioPage({
                 </span>
                 <span>
                   <ClipboardCheck size={15} />
-                  参数可追溯
+                  设置已保存
                 </span>
               </div>
               <div className="make-upload-actions make-console-actions">
@@ -252,7 +252,7 @@ export function StudioPage({
                       </section>
                     ))}
                   </div>
-                  <p className="setting-note">生成时会写入任务追溯记录，方便复用和排查。</p>
+                  <p className="setting-note">这些设置会随生成记录保存，方便后续复用。</p>
                   <div className="make-settings-footer">
                     <button type="button" className="primary-action" onClick={() => setSettingsOpen(false)}>
                       <CheckCircle2 size={17} />
@@ -306,10 +306,10 @@ export function StudioPage({
                 <div>
                   <span>
                     <Clock3 size={16} />
-                    后台任务
+                    生成中
                   </span>
                   <strong>{latestBackgroundTask.title}</strong>
-                  <small>{backgroundTasks.length} 个任务处理中，创作台可继续提交。</small>
+                  <small>{backgroundTasks.length} 个视频正在生成，创作台可继续使用。</small>
                 </div>
                 <button type="button" className="secondary-action" onClick={() => onOpenTask(latestBackgroundTask.id)}>
                   <ArrowUpRight size={16} />

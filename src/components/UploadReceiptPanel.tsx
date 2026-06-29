@@ -16,7 +16,7 @@ const uploadReceiptStatusLabel = (status: UploadReceiptStatus) => {
     saved: '已入库',
     failed: '上传失败',
     cancelled: '已取消',
-    rejected: '服务端驳回',
+    rejected: '请重新上传',
   }
 
   return statusMap[status]
@@ -33,10 +33,9 @@ export function UploadReceiptPanel({ receipt, onCancel, onRetry }: UploadReceipt
           <Upload size={17} />
           <strong>{uploadReceiptStatusLabel(receipt.status)}</strong>
         </span>
-        <em>{receipt.id}</em>
       </div>
       <p>
-        {receipt.fileName} · {receipt.source} · {receipt.message}
+        {receipt.fileName} · {receipt.message}
       </p>
       <span className="upload-receipt-progress" aria-label={`${receipt.progress}%`}>
         <span style={{ width: `${receipt.progress}%` }}></span>

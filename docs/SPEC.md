@@ -47,6 +47,7 @@ Page layout principle:
 
 Frontend prototype demonstration requirements:
 
+- Before any customer-facing demo, the frontend must satisfy [customer-demo-cleanup-spec.md](./customer-demo-cleanup-spec.md): remove prototype language, hide internal trace/payment/risk controls, and present task/template/credit states in customer-facing language.
 - Login/register surfaces can be simulated, but must show QR login, third-party login, signup bonus, and account entry points.
 - QR login must distinguish waiting, scanned, confirmed, expired, and rejected states.
 - Recharge can be simulated, but package selection, payment order creation, pending/paid/failed/expired states, balance change, and ledger change must be visible.

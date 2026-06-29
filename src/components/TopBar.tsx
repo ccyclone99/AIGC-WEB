@@ -13,7 +13,7 @@ const navItems: Array<{ id: ViewId; label: string }> = [
   { id: 'home', label: '首页' },
   { id: 'workbench', label: '生产台' },
   { id: 'templates', label: '模板' },
-  { id: 'tasks', label: '任务' },
+  { id: 'tasks', label: '作品' },
   { id: 'me', label: '我的' },
 ]
 

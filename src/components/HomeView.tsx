@@ -33,10 +33,10 @@ export function HomeView({
   onStartMaking,
 }: HomeViewProps) {
   const primaryTemplate = templates[1]
-  const featuredTemplates = [templates[1], templates[0], templates[2], templates[6]]
+  const featuredTemplates = [templates[1], templates[0], templates[2], templates[4]]
   const routeItems: Array<{ title: string; text: string; Icon: typeof Sparkles; view: ViewId }> = [
     { title: '模板生成', text: '选择模板，上传图片后生成视频。', Icon: Sparkles, view: 'templates' },
-    { title: '生产台', text: '继续制作并查看后台任务。', Icon: FileVideo, view: 'workbench' },
+    { title: '生产台', text: '继续制作并查看生成进度。', Icon: FileVideo, view: 'workbench' },
     { title: '资产库', text: '管理商品图、输出视频和分类。', Icon: ShieldCheck, view: 'me' },
   ]
 
@@ -44,9 +44,9 @@ export function HomeView({
     <div className="page-stack home-page">
       <section className="home-entry-panel">
         <div className="home-entry-copy">
-          <p className="eyebrow">AIGC TEMPLATE VIDEO</p>
+          <p className="eyebrow">电商视频生成平台</p>
           <h1>电商视频，从一张商品图开始</h1>
-          <p>把模型、镜头、后期、比例、积分和失败兜底封装进模板。用户上传素材后直接生成完整短视频，不需要自己写 prompt。</p>
+          <p>选择适合商品的模板，上传一张主图，即可生成适合投放、详情页和内容种草的短视频。</p>
           <div className="home-entry-actions">
             <button type="button" className="primary-action" onClick={() => onStartMaking(primaryTemplate.id)}>
               <ImagePlus size={18} />
@@ -71,8 +71,8 @@ export function HomeView({
               当前可用积分
             </span>
             <span>
-              <strong>后台化</strong>
-              提交后继续创作
+              <strong>继续制作</strong>
+              生成中可继续操作
             </span>
           </div>
         </div>
@@ -81,7 +81,7 @@ export function HomeView({
           <div className="home-demo-bar">
             <span>
               <FileVideo size={15} />
-              Template Composer
+              生成示例
             </span>
             <em>{primaryTemplate.ratio} · 1080p · {primaryTemplate.duration}</em>
           </div>
@@ -95,7 +95,7 @@ export function HomeView({
           </button>
           <span className="home-demo-flow">
             <WandSparkles size={18} />
-            模板自动编排
+            自动生成视频
           </span>
           <button type="button" className="home-demo-output" onClick={() => onOpenTemplate(primaryTemplate.id)}>
             <img src={primaryTemplate.image} alt="生成后的电商短视频预览" />
@@ -122,7 +122,7 @@ export function HomeView({
         </div>
       </section>
 
-      <section className="home-route-strip" aria-label="主要工作流">
+      <section className="home-route-strip" aria-label="主要流程">
         {routeItems.map(({ title, text, Icon, view }) => (
           <button type="button" key={title} onClick={() => onNavigate(view)}>
             <Icon size={19} />
@@ -137,9 +137,9 @@ export function HomeView({
 
       <section className="home-template-rack">
         <div className="section-heading">
-          <p className="eyebrow">STARTING POINTS</p>
+          <p className="eyebrow">热门模板</p>
           <h2>优先开放的模板场景</h2>
-          <span>首页只保留高频入口，完整筛选放到模板库。</span>
+          <span>选择常用场景，上传商品图即可开始。</span>
         </div>
         <div className="home-template-grid">
           {featuredTemplates.map((template) => (

@@ -35,9 +35,9 @@ export function TasksView({ tasks, onOpenTask }: TasksViewProps) {
     <div className="page-stack task-console-page">
       <section className="task-console-head">
         <div>
-          <p className="eyebrow">TASK MONITOR</p>
-          <h1>任务追踪</h1>
-          <p>生成任务会在后台运行。这里查看进度、积分状态、失败释放和参数追溯。</p>
+          <p className="eyebrow">生成记录</p>
+          <h1>我的作品</h1>
+          <p>查看视频生成进度、完成结果和积分状态。</p>
         </div>
         <div className="task-console-stats" aria-label="任务概览">
           <span>
@@ -82,11 +82,11 @@ export function TasksView({ tasks, onOpenTask }: TasksViewProps) {
         </section>
       </section>
 
-      <section className="task-list-shell">
+        <section className="task-list-shell">
         <header>
           <span>
             <strong>全部记录</strong>
-            <small>每条记录可打开详情查看提交参数、供应商尝试和积分流水。</small>
+            <small>打开记录可预览结果、下载作品或查看失败说明。</small>
           </span>
         </header>
         <section className="task-list">
@@ -109,7 +109,7 @@ function TaskRow({ task, onOpen }: { task: Task; onOpen: (taskId: string) => voi
       <img src={task.image} alt={task.title} />
       <span className="task-row-copy">
         <strong>{task.title}</strong>
-        <small>{task.id} · {task.updated}</small>
+        <small>最近更新 · {task.updated}</small>
         <span className="task-row-meta">
           <em className={`status-pill status-${task.status}`}>
             <StatusIcon size={15} />

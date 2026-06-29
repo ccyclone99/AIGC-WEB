@@ -1,8 +1,7 @@
-import { CheckCircle2, Gift, QrCode, TimerReset, UserRound, X } from 'lucide-react'
+import { Gift, QrCode, UserRound } from 'lucide-react'
 
-import { signupRiskChecks } from '../prototypeData'
 import type { AuthMode, QrLoginSession, QrLoginStatus, SignupRewardStatus, ToastState } from '../types'
-import { qrLoginStatusCopy, riskStatusLabel, signupRewardStateCopy } from '../viewModels'
+import { qrLoginStatusCopy, signupRewardStateCopy } from '../viewModels'
 
 type AuthPanelProps = {
   mode: AuthMode
@@ -21,8 +20,6 @@ export function AuthPanel({
   signupRewardStatus,
   onGrantSignupCredits,
   onModeChange,
-  onQrRefresh,
-  onQrStatusChange,
   onToast,
 }: AuthPanelProps) {
   const rewardState = signupRewardStateCopy(signupRewardStatus)
@@ -53,12 +50,12 @@ export function AuthPanel({
           <span>{qrState.label}</span>
         </div>
         <div>
-          <p className="eyebrow">{mode === 'register' ? 'SIGNUP BONUS' : 'LOGIN'}</p>
+          <p className="eyebrow">{mode === 'register' ? '注册福利' : '登录'}</p>
           <h2>{mode === 'register' ? '注册即送 300 积分' : '选择一种方式进入工作台'}</h2>
           <p>
             {mode === 'register'
-              ? '注册赠送会叠加设备、IP、手机号、支付行为和活动规则，防止重复注册薅羊毛。'
-              : '后续可接入微信扫码、手机号验证码、企业微信和第三方账号登录。'}
+              ? '每个账号限领一次，活动规则以页面说明为准。'
+              : '支持扫码、手机号和第三方账号登录。'}
           </p>
         </div>
       </section>
@@ -68,27 +65,9 @@ export function AuthPanel({
             <QrCode size={17} />
             <strong>{qrState.title}</strong>
           </span>
-          <em>{qrLoginSession.id} · {qrLoginSession.expiresIn}</em>
+          <em>{qrLoginSession.expiresIn}</em>
         </header>
         <p>{qrLoginSession.provider} · {qrLoginSession.note}</p>
-        <div className="qr-state-actions">
-          <button type="button" className="secondary-action" onClick={() => onQrStatusChange('scanned')}>
-            <QrCode size={16} />
-            已扫码
-          </button>
-          <button type="button" className="secondary-action" onClick={() => onQrStatusChange('confirmed')}>
-            <CheckCircle2 size={16} />
-            确认登录
-          </button>
-          <button type="button" className="secondary-action" onClick={() => onQrStatusChange('rejected')}>
-            <X size={16} />
-            拒绝登录
-          </button>
-          <button type="button" className="secondary-action" onClick={qrLoginSession.status === 'expired' ? onQrRefresh : () => onQrStatusChange('expired')}>
-            <TimerReset size={16} />
-            {qrLoginSession.status === 'expired' ? '刷新二维码' : '设为过期'}
-          </button>
-        </div>
       </section>
       <section className={`reward-state-panel reward-${signupRewardStatus}`}>
         <span>
@@ -97,23 +76,11 @@ export function AuthPanel({
         </span>
         <small>{rewardState.text}</small>
       </section>
-      <section className="risk-check-grid">
-        {signupRiskChecks.map((check) => (
-          <article className={`risk-check-card risk-${check.status}`} key={check.id}>
-            <span>
-              <small>{check.label}</small>
-              <strong>{check.value}</strong>
-            </span>
-            <em>{riskStatusLabel(check.status)}</em>
-            <p>{check.note}</p>
-          </article>
-        ))}
-      </section>
       <div className="auth-action-grid">
         <button
           type="button"
           className="secondary-action"
-          onClick={() => onQrStatusChange(qrLoginSession.status === 'scanned' ? 'confirmed' : 'scanned')}
+          onClick={() => onToast({ title: '扫码登录', text: '请使用手机扫码完成登录。' })}
         >
           <QrCode size={18} />
           扫码登录
@@ -121,7 +88,7 @@ export function AuthPanel({
         <button
           type="button"
           className="secondary-action"
-          onClick={() => onToast({ title: '第三方登录', text: '可接入微信、支付宝、Google 或 Apple 账号。' })}
+          onClick={() => onToast({ title: '第三方登录', text: '请选择微信、支付宝、Google 或 Apple 账号继续。' })}
         >
           <UserRound size={18} />
           第三方登录

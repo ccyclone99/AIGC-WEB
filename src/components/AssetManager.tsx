@@ -164,7 +164,7 @@ export function AssetManager({
                   <strong>{asset.name}</strong>
                   <em className={canReuse ? 'is-reusable' : 'is-output-only'}>{canReuse ? '可复用' : '仅下载'}</em>
                 </div>
-                <small>{asset.source} · {asset.expires}</small>
+                <small>{asset.expires}</small>
                 <label className="asset-category-select">
                   <span>分类</span>
                   <select value={asset.type} onChange={(event) => onUpdateAssetCategory(asset.id, event.currentTarget.value)}>

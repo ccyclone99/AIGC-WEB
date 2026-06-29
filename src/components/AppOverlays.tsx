@@ -125,7 +125,7 @@ export function AppOverlays({
         </Modal>
       )}
       {overlay === 'task' && (
-        <Drawer title="任务详情" onClose={onCloseOverlay}>
+        <Drawer title="作品详情" onClose={onCloseOverlay}>
           <TaskDetail
             task={selectedTask}
             onAdvance={onAdvanceTask}

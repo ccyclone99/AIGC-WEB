@@ -49,7 +49,7 @@ export function AssetPicker({
     <div className="asset-picker">
       <header className="asset-picker-head">
         <div>
-          <p className="eyebrow">ASSET LIBRARY</p>
+          <p className="eyebrow">资产库</p>
           <strong>先从资产库选图，也可以直接上传新图片。</strong>
         </div>
         <span>{usableAssetCount} 个图片素材可用于当前模板</span>
@@ -141,9 +141,9 @@ export function AssetPicker({
                 </span>
               </div>
               <div className="asset-picker-actions">
-                <em>{asset.source}</em>
+                <em>{asset.kind === 'video' ? '视频素材' : '图片素材'}</em>
                 <button type="button" disabled={!canSelect || isSelected} onClick={() => onSelect(asset.id)}>
-                  {isSelected ? '当前使用' : canSelect ? '选择图片' : '仅可预览'}
+                  {isSelected ? '当前使用' : canSelect ? '选择图片' : '不适用当前模板'}
                 </button>
               </div>
             </article>

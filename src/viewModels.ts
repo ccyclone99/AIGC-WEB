@@ -36,10 +36,10 @@ export const taskCreditState = (task: Task) => {
 
 export const taskStatusCopy = (status: TaskStatus) => {
   const statusMap: Record<TaskStatus, { label: string; detail: string }> = {
-    queued: { label: '排队中', detail: '任务已进入队列，等待供应商和渲染资源。' },
+    queued: { label: '排队中', detail: '视频已进入生成队列，请稍候。' },
     running: { label: '生成中', detail: '生成模型正在处理主视觉和关键帧。' },
-    rendering: { label: '后期渲染', detail: '正在合成字幕、转场、比例和封面。' },
-    review: { label: '审核中', detail: '正在执行内容审核和输出资产入库前检查。' },
+    rendering: { label: '合成中', detail: '正在合成字幕、转场、比例和封面。' },
+    review: { label: '保存中', detail: '正在完成作品保存和入库。' },
     success: { label: '已完成', detail: '输出已生成，资产可预览、下载或复用。' },
     refunded: { label: '失败已释放', detail: '任务失败或被阻断，冻结积分已释放。' },
   }
@@ -50,9 +50,9 @@ export const taskStatusCopy = (status: TaskStatus) => {
 export const failureStageLabel = (stage: TaskFailureStage) => {
   const stageMap: Record<TaskFailureStage, string> = {
     input: '输入校验',
-    provider: '供应商',
-    render: '后期渲染',
-    moderation: '内容审核',
+    provider: '生成服务',
+    render: '视频合成',
+    moderation: '内容确认',
   }
 
   return stageMap[stage]
@@ -60,9 +60,9 @@ export const failureStageLabel = (stage: TaskFailureStage) => {
 
 export const failureReasonLabel = (reason: TaskFailureReason) => {
   const reasonMap: Record<TaskFailureReason, string> = {
-    provider_error: '供应商异常',
+    provider_error: '生成服务异常',
     timeout: '任务超时',
-    moderation_block: '审核阻断',
+    moderation_block: '内容需确认',
     asset_invalid: '素材无效',
   }
 
@@ -79,12 +79,12 @@ export const qrLoginStatusCopy = (status: QrLoginStatus) => {
     scanned: {
       label: '已扫码',
       title: '手机已扫码',
-      text: '请在手机端确认登录，网页端继续等待确认结果。',
+      text: '请在手机端完成登录，网页端会继续等待结果。',
     },
     confirmed: {
       label: '已确认',
       title: '扫码登录成功',
-      text: '手机端已确认，本次 QR 会话已完成。',
+      text: '手机端已确认，可以继续使用。',
     },
     expired: {
       label: '已过期',
@@ -92,9 +92,9 @@ export const qrLoginStatusCopy = (status: QrLoginStatus) => {
       text: '二维码已失效，需要刷新后重新扫码。',
     },
     rejected: {
-      label: '已拒绝',
-      title: '手机端拒绝登录',
-      text: '本次扫码登录被拒绝，账号不会登录。',
+      label: '已取消',
+      title: '登录已取消',
+      text: '本次扫码登录已取消，账号不会登录。',
     },
   }
 
@@ -105,7 +105,7 @@ export const signupRewardStateCopy = (status: SignupRewardStatus) => {
   const statusMap: Record<SignupRewardStatus, { title: string; text: string; action: string }> = {
     eligible: {
       title: '可领取注册积分',
-      text: '通过基础检查后，注册活动积分会写入奖励流水。',
+      text: '完成注册后即可领取活动积分。',
       action: '领取注册积分',
     },
     granted: {
@@ -120,8 +120,8 @@ export const signupRewardStateCopy = (status: SignupRewardStatus) => {
     },
     risk_blocked: {
       title: '活动积分未发放',
-      text: '账号触发活动风控，可以登录，但不能领取注册奖励。',
-      action: '已阻断',
+      text: '该账号暂不符合本次活动领取条件。',
+      action: '暂不可领',
     },
   }
 

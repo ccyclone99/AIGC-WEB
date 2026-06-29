@@ -362,7 +362,7 @@ export function usePrototypeStore() {
           : asset,
       ),
     )
-    setToast({ title: '资产已重命名', text: '名称变更会保留在资产追溯记录中。' })
+    setToast({ title: '资产已重命名', text: '名称变更已保存。' })
   }
 
   const archiveAsset = (assetId: string) => {
@@ -413,7 +413,7 @@ export function usePrototypeStore() {
 
   const downloadAsset = (assetId: string) => {
     const asset = demoAssets.find((item) => item.id === assetId)
-    if (asset) setToast({ title: '已请求下载链接', text: `${asset.name} 的下载链接会由后端签发。` })
+    if (asset) setToast({ title: '下载已准备', text: `${asset.name} 可以下载。` })
   }
 
   const reuseAsset = (assetId: string) => {
@@ -430,7 +430,7 @@ export function usePrototypeStore() {
 
   const downloadTaskResult = (taskId: string) => {
     const task = demoTasks.find((item) => item.id === taskId)
-    if (task) setToast({ title: '已请求输出下载', text: `${task.title} 的输出下载链接会由后端签发。` })
+    if (task) setToast({ title: '下载已准备', text: `${task.title} 可以下载。` })
   }
 
   const openAssetLibrary = () => {
@@ -500,7 +500,7 @@ export function usePrototypeStore() {
       setSelectedTaskId(duplicateTask.id)
       setToast({
         title: '当前图片正在生成',
-        text: '这组图片和参数已有后台任务，可查看任务，或换图/调整高级设置后再提交。',
+        text: '这组图片和设置已有生成记录。可查看进度，或换图/调整设置后再提交。',
       })
       return
     }
@@ -537,10 +537,10 @@ export function usePrototypeStore() {
       status: 'frozen',
       refId: newTask.id,
       time: '刚刚',
-      note: '生成任务已进入后台，积分处于冻结状态。',
+      note: '视频生成中，积分处于冻结状态。',
     })
     setToast({
-      title: '任务已进入后台',
+      title: '已开始生成',
       text: `创作台保持可用，可继续替换图片生成下一条；已冻结 ${totalCost} 积分。`,
     })
   }
@@ -643,7 +643,7 @@ export function usePrototypeStore() {
       channel: '微信/支付宝',
       createdAt: '刚刚',
       expiresIn: '15 分钟',
-      note: '订单已创建，支付成功后才写入积分流水。',
+      note: '订单已创建，支付完成后积分到账。',
     })
     setToast({ title: '支付订单已创建', text: `${pack.name} 等待支付确认。` })
   }
@@ -666,7 +666,7 @@ export function usePrototypeStore() {
       setToast({ title: '积分已到账', text: `${paymentOrder.credits} 积分已写入账户。` })
       return
     }
-    const copy = status === 'cancelled' ? '订单已取消，余额不变。' : status === 'expired' ? '订单已过期，余额不变。' : '支付失败，余额不变。'
+    const copy = status === 'cancelled' ? '订单已取消，余额不变。' : status === 'expired' ? '订单已过期，余额不变。' : '支付未完成，余额不变。'
     setToast({ title: '支付状态已更新', text: copy })
   }
 
@@ -683,9 +683,9 @@ export function usePrototypeStore() {
       status: 'granted',
       refId: 'CAMPAIGN-SIGNUP',
       time: '刚刚',
-      note: '注册活动赠送积分，受风控和活动规则约束。',
+      note: '注册活动赠送积分，每个账号限领一次。',
     })
-    setToast({ title: '注册积分已到账', text: '300 积分已写入奖励流水。' })
+    setToast({ title: '注册积分已到账', text: '300 积分已写入账户。' })
   }
 
   const applyTemplateFilters = () => {

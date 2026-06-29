@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, QrCode, TimerReset, Wallet } from 'lucide-react'
+import { QrCode, Wallet } from 'lucide-react'
 import { useState } from 'react'
 
 import type { LedgerRow, LedgerStatus, PaymentOrder, PaymentOrderStatus, RechargePackage, ToastState } from '../types'
@@ -31,7 +31,7 @@ const paymentOrderStatusLabel = (status: PaymentOrderStatus) => {
     idle: '等待创建',
     pending: '待支付',
     paid: '已支付',
-    failed: '支付失败',
+    failed: '支付未完成',
     cancelled: '已取消',
     expired: '已过期',
   }
@@ -46,7 +46,6 @@ export function CreditPanel({
   paymentOrder,
   packages,
   onCreatePaymentOrder,
-  onResolvePaymentOrder,
   onToast,
 }: CreditPanelProps) {
   const [selectedPackageName, setSelectedPackageName] = useState(() => packages[1]?.name ?? packages[0]?.name ?? '')
@@ -77,7 +76,7 @@ export function CreditPanel({
           <strong>{totalCredits.toLocaleString()}</strong>
         </span>
         <span>
-          <small>冻结流水</small>
+          <small>冻结记录</small>
           <strong>{frozenLedgerCount}</strong>
         </span>
       </section>
@@ -105,7 +104,7 @@ export function CreditPanel({
         onClick={() => selectedPackage && onCreatePaymentOrder(selectedPackage)}
       >
         <Wallet size={18} />
-        {hasPendingOrder ? '订单待支付' : '创建支付订单'}
+        {hasPendingOrder ? '等待支付完成' : '立即充值'}
       </button>
       <section className={`payment-order-panel order-${paymentOrder.status}`}>
         <span>
@@ -113,43 +112,24 @@ export function CreditPanel({
           {orderStatus}
         </span>
         <span>
-          <strong>{paymentOrder.id} · {paymentOrder.packageName} · {paymentOrder.amount}</strong>
+          <strong>{paymentOrder.packageName} · {paymentOrder.amount}</strong>
           <small>
             {paymentOrder.credits.toLocaleString()} 积分 · {paymentOrder.channel} · {paymentOrder.createdAt} · {paymentOrder.expiresIn}
           </small>
           <em>{paymentOrder.note}</em>
         </span>
       </section>
-      <div className="payment-order-actions">
-        <button type="button" className="secondary-action" disabled={!hasPendingOrder} onClick={() => onResolvePaymentOrder('paid')}>
-          <CheckCircle2 size={16} />
-          支付成功
-        </button>
-        <button type="button" className="secondary-action" disabled={!hasPendingOrder} onClick={() => onResolvePaymentOrder('failed')}>
-          <AlertTriangle size={16} />
-          支付失败
-        </button>
-        <button type="button" className="secondary-action" disabled={!hasPendingOrder} onClick={() => onResolvePaymentOrder('expired')}>
-          <TimerReset size={16} />
-          订单过期
-        </button>
-        <button type="button" className="secondary-action" disabled={!hasPendingOrder} onClick={() => onResolvePaymentOrder('cancelled')}>
-          <AlertTriangle size={16} />
-          取消订单
-        </button>
-      </div>
       <section className="ledger-list">
         {ledgerRows.map((row) => (
           <div className={`ledger-row ledger-${row.status}`} key={row.id}>
             <span className="ledger-main">
               <strong>{row.title}</strong>
-              <small>{row.id} · {row.time} · {row.refId}</small>
+              <small>{row.time}</small>
               <em>{row.note}</em>
             </span>
             <span className="ledger-side">
               <i>{ledgerStatusLabel(row.status)}</i>
               <b>{row.amount}</b>
-              <small>{row.source}</small>
             </span>
           </div>
         ))}

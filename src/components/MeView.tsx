@@ -95,7 +95,7 @@ export function MeView({
   const videoAssets = activeAssets.filter((asset) => asset.kind === 'video')
   const tabs: Array<{ id: MeTab; label: string; text: string; count: string }> = [
     { id: 'assets', label: '资产库', text: '图片、视频、分类', count: `${activeAssets.length}` },
-    { id: 'credits', label: '积分中心', text: '充值、冻结、流水', count: creditBalance.toLocaleString() },
+    { id: 'credits', label: '积分中心', text: '充值、冻结、明细', count: creditBalance.toLocaleString() },
     { id: 'account', label: '账号安全', text: '扫码、第三方、活动', count: '登录' },
   ]
   const getTabId = (tab: MeTab) => `me-${tab}-tab`
@@ -105,9 +105,9 @@ export function MeView({
     <div className="page-stack account-page me-console-page">
       <section className="me-console-head">
         <div>
-          <p className="eyebrow">RESOURCE CENTER</p>
+          <p className="eyebrow">我的空间</p>
           <h1>资源与账号</h1>
-          <p>资产库、积分流水和登录安全集中管理。创作过程只调用这里的可用素材和账户额度。</p>
+          <p>资产库、积分明细和账号安全集中管理。创作过程只调用这里的可用素材和账户额度。</p>
         </div>
         <div className="me-console-kpis" aria-label="个人空间概览">
           <button type="button" onClick={() => setActiveTab('assets')}>
@@ -218,7 +218,7 @@ export function MeView({
       <section className="me-console-note" aria-label="资产状态说明">
         <span>{videoAssets.length} 个生成视频</span>
         <span>{archivedAssets.length} 个已归档资产</span>
-        <span>供应商临时资源会转存后再进入资产库</span>
+        <span>生成结果会自动保存到资产库</span>
       </section>
     </div>
   )

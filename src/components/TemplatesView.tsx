@@ -5,7 +5,8 @@ import { templateInputLabel } from '../domain'
 import { filterGroups, initialTasks } from '../prototypeData'
 import type { Template } from '../types'
 
-const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真', '视频模板']
+const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真']
+const hiddenCustomerFilters = new Set(['视频模板', '视频素材'])
 
 const isVideoTemplate = (template: Template) => template.category === '视频模板'
 
@@ -20,9 +21,9 @@ const templateOutputLabel = (template: Template) => {
 const templateAvailability = (template: Template) =>
   isVideoTemplate(template)
     ? {
-        label: '预览开放',
+        label: '即将上线',
         tone: 'is-preview-only',
-        helper: '视频上传与剪辑台后续开放',
+        helper: '该模板正在排期中',
       }
     : {
         label: '可直接制作',
@@ -74,14 +75,14 @@ export function TemplatesView({
   onSearch,
   onToggleFilter,
 }: TemplatesViewProps) {
-  const usableCount = templates.filter((template) => !isVideoTemplate(template)).length
-  const videoPreviewCount = templates.length - usableCount
+  const customerTemplates = templates.filter((template) => !isVideoTemplate(template))
+  const usableCount = customerTemplates.length
 
   return (
     <div className="page-stack template-page">
       <section className="hero-panel template-hero-premium template-shelf-head">
         <div>
-          <p className="eyebrow">TEMPLATE SHELF</p>
+          <p className="eyebrow">模板库</p>
           <h1>模板库</h1>
           <p>按输入素材、输出场景和积分成本选择视频方案。</p>
           <div className="template-hero-metrics" aria-label="模板库概览">
@@ -90,8 +91,8 @@ export function TemplatesView({
               <small>可直接制作</small>
             </span>
             <span>
-              <strong>{videoPreviewCount}</strong>
-              <small>视频预览</small>
+              <strong>6 秒</strong>
+              <small>最快成片</small>
             </span>
             <span>
               <strong>1 图</strong>
@@ -111,7 +112,7 @@ export function TemplatesView({
         </div>
         <div className="template-hero-preview-stack">
           <button type="button" className="hero-preview template-hero-main-preview" onClick={() => onOpenTemplate('watch')}>
-            <img src={templates[0]?.image ?? initialTasks[1].image} alt="精品表款模板预览" />
+            <img src={customerTemplates[0]?.image ?? initialTasks[1].image} alt="精品表款模板预览" />
             <span>商品图输入</span>
             <em>8 秒质感转场 · 168 积分</em>
           </button>
@@ -138,7 +139,7 @@ export function TemplatesView({
           <Filter size={18} />
           {selectedFilters.length > 0 ? `筛选 ${selectedFilters.length}` : '筛选'}
         </button>
-        <span className="template-count-chip">{templates.length} 个模板</span>
+        <span className="template-count-chip">{customerTemplates.length} 个模板</span>
       </section>
 
       <section className="template-mode-strip" aria-label="模板类型">
@@ -161,7 +162,7 @@ export function TemplatesView({
         <span>
           <ImageUp size={16} />
           <strong>先确认输入</strong>
-          <small>第一版主跑商品图生成视频</small>
+          <small>上传商品图即可开始</small>
         </span>
         <span>
           <Coins size={16} />
@@ -171,7 +172,7 @@ export function TemplatesView({
         <span>
           <ShieldCheck size={16} />
           <strong>最后进创作台</strong>
-          <small>参数和资产写入任务记录</small>
+          <small>生成记录会自动保存</small>
         </span>
       </section>
 
@@ -190,11 +191,11 @@ export function TemplatesView({
       )}
 
       <section className="template-grid">
-        {templates.map((template, index) => (
+        {customerTemplates.map((template, index) => (
           <TemplateCard key={template.id} index={index} template={template} onOpen={onOpenTemplate} />
         ))}
       </section>
-      {templates.length === 0 && (
+      {customerTemplates.length === 0 && (
         <section className="empty-state">
           <Search size={22} />
           <strong>没有匹配模板</strong>
@@ -308,36 +309,12 @@ export function TemplateDetail({
             <strong>{outputLabel}</strong>
           </span>
         </section>
-        <section className="template-contract-panel">
-          <header>
-            <strong>模板协议</strong>
-            <small>{template.config.version} · {template.config.pricingVersion}</small>
-          </header>
-          <div>
-            <span>
-              <small>输入项</small>
-              <strong>{template.config.inputFields.map((field) => field.label).join(' / ')}</strong>
-            </span>
-            <span>
-              <small>工作流</small>
-              <strong>{template.config.workflowLabel}</strong>
-            </span>
-            <span>
-              <small>结算</small>
-              <strong>{template.config.settlement === 'freeze_then_settle' ? '预冻结后结算' : template.config.settlement}</strong>
-            </span>
-            <span>
-              <small>能力</small>
-              <strong>{template.config.capabilities.length} 项</strong>
-            </span>
-          </div>
-        </section>
         {isVideo && (
           <div className="detail-support-note">
             <FileVideo size={17} />
             <span>
-              <strong>视频制作台建设中</strong>
-              当前可查看模板预览；视频上传、字幕包装和剪辑参数会进入独立制作台。
+              <strong>即将上线</strong>
+              该模板正在排期中，当前可先查看样片。
             </span>
           </div>
         )}
@@ -345,7 +322,7 @@ export function TemplateDetail({
           <p>{isVideo ? '当前先用于预览和方案确认。' : '进入创作台后只需要选择图片，默认参数可直接提交。'}</p>
           <button type="button" className="primary-action" disabled={isVideo} onClick={onCreate}>
             <WandSparkles size={18} />
-            {isVideo ? '视频制作暂未开放' : '进入创作台'}
+            {isVideo ? '即将上线' : '进入创作台'}
           </button>
         </div>
       </div>
@@ -375,9 +352,11 @@ export function FilterPanel({
           清空筛选
         </button>
       </section>
-      {filterGroups.map((group) => (
-        <FilterGroup key={group.title} items={group.items} selectedFilters={selectedFilters} title={group.title} onToggle={onToggle} />
-      ))}
+      {filterGroups.map((group) => {
+        const customerItems = group.items.filter((item) => !hiddenCustomerFilters.has(item))
+        if (customerItems.length === 0) return null
+        return <FilterGroup key={group.title} items={customerItems} selectedFilters={selectedFilters} title={group.title} onToggle={onToggle} />
+      })}
       <button type="button" className="primary-action" onClick={onApply}>
         应用筛选
       </button>

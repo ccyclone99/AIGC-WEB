@@ -73,9 +73,9 @@ export function WorkbenchView({
       <section className="production-desk production-command-center">
         <header className="production-desk-head">
           <div>
-            <p className="eyebrow">PRODUCTION DESK</p>
+            <p className="eyebrow">我的生产台</p>
             <h1>生产台</h1>
-            <span>开始新视频、查看后台任务、复用最近资产。</span>
+            <span>开始新视频、查看生成进度、复用最近资产。</span>
           </div>
           <div className="production-head-actions">
             <button type="button" className="primary-action" onClick={() => onStartMaking('sneaker')}>
@@ -112,9 +112,9 @@ export function WorkbenchView({
       <section className="production-board">
         <section className="production-primary-panel">
           <div className="production-primary-copy">
-            <p className="eyebrow">RECOMMENDED FLOW</p>
+            <p className="eyebrow">推荐流程</p>
             <h2>商品图生成电商短视频</h2>
-            <p>第一版保持最短路径：选模板，上传一张图，确认高级参数，任务进入后台生成。</p>
+            <p>选模板，上传一张图，确认画面参数，系统自动生成视频。</p>
           </div>
           <button type="button" className="production-upload-path" onClick={() => onStartMaking('sneaker')}>
             <span>
@@ -147,7 +147,7 @@ export function WorkbenchView({
             <header>
               <span>
                 <Gauge size={18} />
-                <strong>后台任务</strong>
+                <strong>生成中</strong>
               </span>
               <button type="button" onClick={() => onNavigate('tasks')}>
                 全部
@@ -215,7 +215,7 @@ function WorkbenchTask({ task, onOpen }: { task: Task; onOpen: (taskId: string) 
       <img src={task.image} alt={task.title} />
       <span>
         <strong>{task.title}</strong>
-        <small>{task.id} · {task.updated}</small>
+        <small>最近更新 · {task.updated}</small>
       </span>
       <em className={`status-pill status-${task.status}`}>
         <StatusIcon size={15} />
