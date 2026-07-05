@@ -7316,45 +7316,77 @@ summary:focus-visible {
   }
 
   .asset-picker {
+    gap: 10px;
     padding: 12px;
   }
 
   .asset-picker-head {
     display: grid;
     align-items: start;
+    gap: 7px;
+  }
+
+  .asset-picker-head strong {
+    font-size: 17px;
+    line-height: 1.25;
   }
 
   .asset-picker-head span {
+    width: fit-content;
+    padding: 5px 7px;
     white-space: normal;
   }
 
-  .asset-picker-status-strip span {
-    flex: 1 1 100%;
-    min-width: 0;
-    flex-basis: 168px;
-    min-height: 36px;
-    padding: 0 8px;
-  }
-
   .asset-picker-status-strip {
-    flex-wrap: wrap;
-    overflow: visible;
-  }
-
-  .asset-picker-filters {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
     overflow: visible;
     padding-bottom: 0;
   }
 
+  .asset-picker-status-strip span {
+    flex: none;
+    min-width: 0;
+    min-height: 36px;
+    padding: 0 8px;
+  }
+
+  .asset-picker-status-strip .asset-picker-current-state {
+    min-width: 0;
+  }
+
+  .asset-picker-status-strip .asset-picker-count-state {
+    gap: 5px;
+  }
+
+  .asset-picker-status-strip .asset-picker-count-state strong {
+    display: none;
+  }
+
+  .asset-picker-status-strip .asset-picker-count-state em {
+    font-size: 12px;
+  }
+
+  .asset-picker-status-strip .asset-picker-count-state + .asset-picker-count-state {
+    display: none;
+  }
+
+  .asset-picker-filters {
+    flex-wrap: nowrap;
+    margin-right: -12px;
+    overflow-x: auto;
+    padding: 0 12px 2px 0;
+  }
+
   .asset-picker-filters button {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     justify-content: center;
     max-width: 100%;
   }
 
   .asset-picker-upload {
-    min-height: 170px;
+    min-height: 150px;
   }
 
   .asset-picker-card {

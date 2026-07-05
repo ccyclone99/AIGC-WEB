@@ -96,48 +96,6 @@ export function TaskDetail({
       <div className="progress-track">
         <span style={{ width: `${task.progress}%` }}></span>
       </div>
-      <section className={`task-state-panel ${creditState.className}`}>
-        <span>
-          <Coins size={17} />
-          <strong>{creditState.label}</strong>
-          <small>{creditState.text}</small>
-        </span>
-        <span>
-          <StatusIcon size={17} />
-          <strong>{status.label}</strong>
-          <small>{status.detail}</small>
-        </span>
-        <span>
-          <ShieldCheck size={17} />
-          <strong>记录已保存</strong>
-          <small>生成设置和积分状态会保留在记录中。</small>
-        </span>
-      </section>
-      <section className="task-param-panel">
-        <header>
-          <strong>生成设置</strong>
-          <small>这些设置会随作品记录保存，方便下次复用。</small>
-        </header>
-        <div className="task-param-grid">
-          {settingRows.map((row) => (
-            <span key={row.label}>
-              <small>{row.label}</small>
-              <strong>{row.value}</strong>
-            </span>
-          ))}
-        </div>
-      </section>
-      {task.failure && (
-        <section className="task-failure-panel">
-          <header>
-            <span>
-              <AlertTriangle size={17} />
-              <strong>生成未完成</strong>
-            </span>
-          </header>
-          <p>{customerFailureMessage(task)}</p>
-        </section>
-      )}
       {isSuccess && (
         <section className="task-result-panel">
           <button type="button" className="task-result-media" onClick={onPreview}>
@@ -178,6 +136,17 @@ export function TaskDetail({
           </div>
         </section>
       )}
+      {task.failure && (
+        <section className="task-failure-panel">
+          <header>
+            <span>
+              <AlertTriangle size={17} />
+              <strong>生成未完成</strong>
+            </span>
+          </header>
+          <p>{customerFailureMessage(task)}</p>
+        </section>
+      )}
       {isRefunded && (
         <section className="task-recovery-panel">
           <AlertTriangle size={19} />
@@ -192,16 +161,49 @@ export function TaskDetail({
           </span>
         </section>
       )}
-      <div className="drawer-actions">
-        <button type="button" className="secondary-action" disabled={task.status !== 'success'} onClick={onPreview}>
-          <Play size={18} />
-          预览结果
-        </button>
-        <button type="button" className="secondary-action" disabled={task.status !== 'success'} onClick={onDownload}>
-          <Download size={18} />
-          下载结果
-        </button>
-      </div>
+      <section className={`task-state-panel ${creditState.className}`}>
+        <span>
+          <Coins size={17} />
+          <strong>{creditState.label}</strong>
+          <small>{creditState.text}</small>
+        </span>
+        <span>
+          <StatusIcon size={17} />
+          <strong>{status.label}</strong>
+          <small>{status.detail}</small>
+        </span>
+        <span>
+          <ShieldCheck size={17} />
+          <strong>记录已保存</strong>
+          <small>生成设置和积分状态会保留在记录中。</small>
+        </span>
+      </section>
+      <section className="task-param-panel">
+        <header>
+          <strong>生成设置</strong>
+          <small>这些设置会随作品记录保存，方便下次复用。</small>
+        </header>
+        <div className="task-param-grid">
+          {settingRows.map((row) => (
+            <span key={row.label}>
+              <small>{row.label}</small>
+              <strong>{row.value}</strong>
+            </span>
+          ))}
+        </div>
+      </section>
+      {isSuccess && (
+        <div className="drawer-actions">
+          <button type="button" className="secondary-action" onClick={onPreview}>
+            <Play size={18} />
+            预览结果
+          </button>
+          <button type="button" className="secondary-action" onClick={onDownload}>
+            <Download size={18} />
+            下载结果
+          </button>
+        </div>
+      )}
     </div>
   )
 }

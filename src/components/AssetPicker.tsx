@@ -56,17 +56,17 @@ export function AssetPicker({
       </header>
 
       <section className="asset-picker-status-strip">
-        <span>
+        <span className="asset-picker-current-state">
           <CheckCircle2 size={17} />
           <strong>当前</strong>
           <em>{selectedAsset?.name ?? '未选择图片'}</em>
         </span>
-        <span>
+        <span className="asset-picker-count-state">
           <Images size={17} />
           <strong>可生成</strong>
           <em>{usableAssetCount} 个图片</em>
         </span>
-        <span>
+        <span className="asset-picker-count-state">
           <Play size={17} />
           <strong>仅预览</strong>
           <em>{previewOnlyCount} 个素材</em>
