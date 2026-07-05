@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 
 import { canUseAssetForGeneration, filterAssetByCategory, isExpiringAsset } from '../domain'
-import type { Asset, AssetFilter, UploadReceipt } from '../types'
+import type { Asset, AssetFilter, PreviewMedia, UploadReceipt } from '../types'
 import { assetFilterEmptyText } from '../viewModels'
 import { UploadReceiptPanel } from './UploadReceiptPanel'
 
@@ -28,7 +28,7 @@ type AssetManagerProps = {
   onCreateAssetCategory: (name: string) => boolean
   onDeleteAssetCategory: (name: string) => void
   onDownloadAsset: (assetId: string) => void
-  onPreview: (title: string, image: string) => void
+  onPreview: (title: string, image: string, media?: Partial<Pick<PreviewMedia, 'kind' | 'videoSrc'>>) => void
   onRenameAsset: (assetId: string) => void
   onRestoreAsset: (assetId: string) => void
   onRetryUpload: () => void
@@ -155,7 +155,17 @@ export function AssetManager({
 
           return (
             <article className={asset.status === 'archived' ? 'asset-manage-card is-archived' : 'asset-manage-card'} key={asset.id}>
-              <button type="button" className="asset-manage-media" onClick={() => onPreview(asset.name, asset.image)}>
+              <button
+                type="button"
+                className="asset-manage-media"
+                onClick={() =>
+                  onPreview(
+                    asset.name,
+                    asset.image,
+                    asset.kind === 'video' ? { kind: 'video', videoSrc: asset.videoSrc } : undefined,
+                  )
+                }
+              >
                 <img src={asset.image} alt={asset.name} />
                 <span>{asset.type}</span>
               </button>

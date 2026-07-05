@@ -218,6 +218,7 @@ function toAssetDto(asset: Asset): AssetDto {
     type: asset.type,
     kind: asset.kind,
     image: asset.image,
+    videoSrc: asset.videoSrc,
     expiresLabel: asset.expires,
     status: asset.status,
     source: asset.source,
@@ -254,6 +255,7 @@ function toTaskDto(task: Task): GenerationTaskDto {
     cost: task.cost,
     updatedAt: nowIso(),
     image: task.image,
+    videoSrc: task.videoSrc,
     params: {
       templateId: task.params?.templateId ?? 'unknown-template',
       templateVersion: task.params?.templateVersion ?? 'unknown@v1',

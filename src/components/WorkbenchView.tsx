@@ -17,7 +17,7 @@ import {
 import type { CSSProperties } from 'react'
 
 import { activeStatuses, initialTasks, templates } from '../prototypeData'
-import type { Asset, Task, TaskStatus, ViewId } from '../types'
+import type { Asset, PreviewMedia, Task, TaskStatus, ViewId } from '../types'
 import { taskStatusCopy } from '../viewModels'
 
 type WorkbenchViewProps = {
@@ -29,7 +29,7 @@ type WorkbenchViewProps = {
   onNavigate: (view: ViewId) => void
   onOpenTask: (taskId: string) => void
   onOpenTemplate: (templateId: string) => void
-  onPreview: (title: string, image: string) => void
+  onPreview: (title: string, image: string, media?: Partial<Pick<PreviewMedia, 'kind' | 'videoSrc'>>) => void
   onStartMaking: (templateId: string) => void
 }
 
@@ -185,7 +185,17 @@ export function WorkbenchView({
             </header>
             <div className="production-asset-strip">
               {recentAssets.map((asset) => (
-                <button type="button" key={asset.id} onClick={() => onPreview(asset.name, asset.image)}>
+                <button
+                  type="button"
+                  key={asset.id}
+                  onClick={() =>
+                    onPreview(
+                      asset.name,
+                      asset.image,
+                      asset.kind === 'video' ? { kind: 'video', videoSrc: asset.videoSrc } : undefined,
+                    )
+                  }
+                >
                   <img src={asset.image} alt={asset.name} />
                   <span>{asset.type}</span>
                 </button>

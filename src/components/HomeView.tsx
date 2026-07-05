@@ -16,7 +16,6 @@ import { templates } from '../prototypeData'
 import type { AuthMode, ViewId } from '../types'
 
 type HomeViewProps = {
-  creditBalance: number
   onAuth: (mode: AuthMode) => void
   onNavigate: (view: ViewId) => void
   onOpenTemplate: (templateId: string) => void
@@ -25,7 +24,6 @@ type HomeViewProps = {
 }
 
 export function HomeView({
-  creditBalance,
   onAuth,
   onNavigate,
   onOpenTemplate,
@@ -35,9 +33,9 @@ export function HomeView({
   const primaryTemplate = templates[1]
   const featuredTemplates = [templates[1], templates[0], templates[2], templates[4]]
   const routeItems: Array<{ title: string; text: string; Icon: typeof Sparkles; view: ViewId }> = [
-    { title: '模板生成', text: '选择模板，上传图片后生成视频。', Icon: Sparkles, view: 'templates' },
-    { title: '生产台', text: '继续制作并查看生成进度。', Icon: FileVideo, view: 'workbench' },
-    { title: '资产库', text: '管理商品图、输出视频和分类。', Icon: ShieldCheck, view: 'me' },
+    { title: '选模板', text: '按商品场景选择视频方案。', Icon: Sparkles, view: 'templates' },
+    { title: '去生产台', text: '上传图片并后台生成。', Icon: FileVideo, view: 'workbench' },
+    { title: '管资产', text: '管理商品图、输出视频和分类。', Icon: ShieldCheck, view: 'me' },
   ]
 
   return (
@@ -45,12 +43,12 @@ export function HomeView({
       <section className="home-entry-panel">
         <div className="home-entry-copy">
           <p className="eyebrow">电商视频生成平台</p>
-          <h1>电商视频，从一张商品图开始</h1>
-          <p>选择适合商品的模板，上传一张主图，即可生成适合投放、详情页和内容种草的短视频。</p>
+          <h1>一张商品图，生成可投放短视频</h1>
+          <p>选择模板、上传主图、提交生成。生成任务会在后台处理，作品完成后自动进入资产库。</p>
           <div className="home-entry-actions">
             <button type="button" className="primary-action" onClick={() => onStartMaking(primaryTemplate.id)}>
               <ImagePlus size={18} />
-              上传商品图
+              立即生成视频
             </button>
             <button type="button" className="secondary-action" onClick={() => onNavigate('templates')}>
               <Library size={18} />
@@ -64,15 +62,15 @@ export function HomeView({
           <div className="home-kpi-row" aria-label="平台能力">
             <span>
               <strong>1 张图</strong>
-              首版核心输入
+              当前核心输入
             </span>
             <span>
-              <strong>{creditBalance.toLocaleString()}</strong>
-              当前可用积分
+              <strong>失败释放</strong>
+              预扣积分更清楚
             </span>
             <span>
-              <strong>继续制作</strong>
-              生成中可继续操作
+              <strong>自动入库</strong>
+              作品可复用管理
             </span>
           </div>
         </div>

@@ -79,6 +79,7 @@ export type Task = {
   cost: number
   updated: string
   image: string
+  videoSrc?: string
   failure?: TaskFailure
   params?: OutputSettings & {
     templateId: string
@@ -104,6 +105,7 @@ export type Asset = {
   type: string
   kind: AssetKind
   image: string
+  videoSrc?: string
   expires: string
   status: AssetStatus
   source: string

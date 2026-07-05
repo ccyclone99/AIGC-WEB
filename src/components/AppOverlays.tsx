@@ -131,7 +131,13 @@ export function AppOverlays({
             onAdvance={onAdvanceTask}
             onDownload={() => onDownloadTask(selectedTask.id)}
             onOpenAssets={onOpenAssetLibrary}
-            onPreview={() => onPreview(selectedTask.title, selectedTask.image)}
+            onPreview={() =>
+              onPreview(
+                selectedTask.title,
+                selectedTask.image,
+                selectedTask.status === 'success' ? { kind: 'video', videoSrc: selectedTask.videoSrc } : undefined,
+              )
+            }
             onRefund={onRefundTask}
           />
         </Drawer>

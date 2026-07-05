@@ -21,6 +21,7 @@ import {
   maxUploadSize,
   rechargePackages,
   templates,
+  videoPreviewSrc,
 } from '../prototypeData'
 import { qrLoginStatusCopy } from '../viewModels'
 import type {
@@ -565,6 +566,7 @@ export function usePrototypeStore() {
         type: '生成视频',
         kind: 'video',
         image: task.image,
+        videoSrc: videoPreviewSrc,
         expires: '30 天后过期',
         status: 'library',
         source: task.id,

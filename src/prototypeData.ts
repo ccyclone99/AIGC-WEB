@@ -314,6 +314,7 @@ export const initialTasks: Task[] = [
     cost: 168,
     updated: '18 分钟前',
     image: templates[0].image,
+    videoSrc: videoPreviewSrc,
     params: {
       templateId: 'watch',
       templateVersion: 'watch@v1',
@@ -430,6 +431,7 @@ export const initialAssets: Asset[] = [
     type: '生成视频',
     kind: 'video',
     image: templates[1].image,
+    videoSrc: videoPreviewSrc,
     expires: '29 天后过期',
     status: 'library',
     source: '任务输出',

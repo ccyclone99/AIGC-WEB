@@ -7,6 +7,7 @@ import type {
   LedgerRow,
   PaymentOrder,
   PaymentOrderStatus,
+  PreviewMedia,
   QrLoginSession,
   QrLoginStatus,
   RechargePackage,
@@ -37,7 +38,7 @@ type MeViewProps = {
   onDeleteAssetCategory: (name: string) => void
   onDownloadAsset: (assetId: string) => void
   onGrantSignupCredits: () => void
-  onPreview: (title: string, image: string) => void
+  onPreview: (title: string, image: string, media?: Partial<Pick<PreviewMedia, 'kind' | 'videoSrc'>>) => void
   onQrRefresh: () => void
   onQrStatusChange: (status: QrLoginStatus) => void
   onRenameAsset: (assetId: string) => void

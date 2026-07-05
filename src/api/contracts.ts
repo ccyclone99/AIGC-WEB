@@ -106,6 +106,7 @@ export type AssetDto = {
   type: string
   kind: AssetKind
   image: string
+  videoSrc?: string
   expiresAt?: string
   expiresLabel: string
   status: AssetStatus
@@ -167,6 +168,7 @@ export type GenerationTaskDto = {
   cost: number
   updatedAt: string
   image: string
+  videoSrc?: string
   params: CreateGenerationTaskRequest
   failure?: TaskFailure
   ledgerIds: string[]

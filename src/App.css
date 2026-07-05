@@ -18,10 +18,10 @@
   top: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: minmax(210px, 1fr) auto minmax(210px, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
-  min-height: 70px;
+  gap: 16px;
+  min-height: 64px;
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
   background: rgba(250, 250, 247, 0.9);
@@ -94,6 +94,7 @@
 }
 
 .top-links {
+  justify-self: center;
   justify-content: center;
   gap: 5px;
   padding: 5px;
@@ -130,6 +131,7 @@
 }
 
 .account-cluster {
+  justify-self: end;
   justify-content: flex-end;
   gap: 10px;
 }
@@ -1887,18 +1889,21 @@
 
 .make-submit-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px;
-  gap: 10px 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(156px, 0.34fr);
+  gap: 12px;
   align-items: center;
+  padding: 14px;
   border-color: rgba(15, 139, 108, 0.22);
   background:
-    linear-gradient(135deg, rgba(223, 248, 237, 0.78), rgba(255, 255, 255, 0.96)),
+    linear-gradient(135deg, rgba(223, 248, 237, 0.9), rgba(255, 255, 255, 0.98)),
     #fff;
+  box-shadow: 0 16px 42px rgba(7, 67, 56, 0.08);
 }
 
-.make-submit-panel div {
+.make-submit-copy {
   display: grid;
-  gap: 4px;
+  gap: 5px;
+  min-width: 0;
 }
 
 .make-submit-panel span {
@@ -1915,18 +1920,16 @@
   line-height: 1;
 }
 
-.make-submit-panel p {
-  grid-column: 1;
+.make-submit-copy p {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.5;
 }
 
 .make-submit-panel .primary-action {
-  grid-column: 2;
-  grid-row: 1 / span 2;
   width: 100%;
-  min-height: 52px;
+  min-height: 56px;
 }
 
 .make-submit-panel .primary-action.is-processing:disabled {
@@ -7919,7 +7922,7 @@ summary:focus-visible {
   }
 
   .make-submit-panel {
-    grid-template-columns: minmax(0, 1fr) minmax(124px, 0.78fr);
+    grid-template-columns: 1fr;
     padding: 10px;
   }
 
@@ -7983,10 +7986,10 @@ summary:focus-visible {
 
 .home-entry-panel {
   display: grid;
-  grid-template-columns: minmax(0, 0.96fr) minmax(420px, 0.74fr);
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 0.72fr);
   gap: 16px;
   align-items: stretch;
-  min-height: 512px;
+  min-height: 456px;
   padding: 16px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -8001,24 +8004,24 @@ summary:focus-visible {
 .home-entry-copy {
   display: grid;
   align-content: center;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
-  padding: 24px;
+  padding: 22px;
 }
 
 .home-entry-copy h1 {
   max-width: 680px;
   margin: 0;
-  font-size: 58px;
-  line-height: 1.02;
+  font-size: 52px;
+  line-height: 1.04;
 }
 
 .home-entry-copy p:not(.eyebrow) {
   max-width: 620px;
   margin: 0;
   color: var(--muted);
-  font-size: 17px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.65;
 }
 
 .home-entry-actions {
@@ -8047,7 +8050,7 @@ summary:focus-visible {
 
 .home-kpi-row strong {
   color: var(--ink);
-  font-size: 24px;
+  font-size: 21px;
   line-height: 1;
 }
 
@@ -8115,12 +8118,12 @@ summary:focus-visible {
 }
 
 .home-demo-input {
-  min-height: 276px;
-  margin-top: 34px;
+  min-height: 238px;
+  margin-top: 24px;
 }
 
 .home-demo-output {
-  min-height: 360px;
+  min-height: 318px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
 }
 
@@ -8922,6 +8925,10 @@ summary:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .home-entry-panel {
+    min-height: 0;
+  }
+
   .home-entry-panel,
   .home-template-rack,
   .production-command-center,
@@ -8953,6 +8960,21 @@ summary:focus-visible {
     flex: 1 1 148px;
   }
 
+  .home-kpi-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .home-kpi-row span {
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .home-kpi-row strong {
+    font-size: 15px;
+    line-height: 1.15;
+  }
+
   .home-kpi-row,
   .home-demo-status,
   .home-route-strip,
@@ -8967,12 +8989,25 @@ summary:focus-visible {
 
   .home-composer-demo {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .home-demo-input,
+  .home-demo-flow {
+    display: none;
+  }
+
   .home-demo-output {
-    min-height: 220px;
+    min-height: 224px;
     margin-top: 0;
+  }
+
+  .home-demo-status {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-kpi-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .home-demo-flow {

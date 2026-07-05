@@ -24,7 +24,6 @@ function App() {
 
       {store.activeView === 'home' && (
         <HomeView
-          creditBalance={store.creditBalance}
           onAuth={store.openAuth}
           onNavigate={store.goToView}
           onOpenTemplate={store.openTemplate}
@@ -42,6 +41,7 @@ function App() {
             tasks={store.demoTasks}
             template={store.selectedStudioTemplate}
             onAssetSelect={store.selectStudioAsset}
+            onCredits={store.openCredits}
             onOpenAssetPicker={store.openAssetPicker}
             onOpenTask={store.openTask}
             onOutputSettingChange={store.updateOutputSetting}

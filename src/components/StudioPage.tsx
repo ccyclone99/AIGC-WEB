@@ -31,6 +31,7 @@ type StudioPageProps = {
   tasks: Task[]
   template: Template
   onAssetSelect: (assetId: string) => void
+  onCredits: () => void
   onOpenAssetPicker: () => void
   onOpenTask: (taskId: string) => void
   onOutputSettingChange: (key: OutputSettingKey, value: string) => void
@@ -46,6 +47,7 @@ export function StudioPage({
   tasks,
   template,
   onAssetSelect,
+  onCredits,
   onOpenAssetPicker,
   onOpenTask,
   onOutputSettingChange,
@@ -68,7 +70,8 @@ export function StudioPage({
               sameOutputSettings(task.params, outputSettings))),
       )
     : undefined
-  const canGenerate = hasSelectedAsset && !duplicateTask
+  const canSubmitGeneration = hasSelectedAsset && hasEnoughCredits && !duplicateTask
+  const canUseSubmitAction = hasSelectedAsset && !duplicateTask
   const settingSummary = `${outputSettings.ratio} · ${outputSettings.duration} · ${outputSettings.resolution} · ${outputSettings.quality}`
   const [settingsOpen, setSettingsOpen] = useState(false)
   const backgroundTasks = tasks.filter((task) => activeStatuses.includes(task.status)).slice(0, 3)
@@ -282,19 +285,19 @@ export function StudioPage({
             </section>
 
             <section className="make-submit-panel">
-              <div>
+              <div className="make-submit-copy">
                 <span>
                   <Coins size={17} />
-                  预计冻结
+                  准备生成
                 </span>
                 <strong>{totalCost} 积分</strong>
+                <p>{submitHint}</p>
               </div>
-              <p>{submitHint}</p>
               <button
                 type="button"
                 className={duplicateTask ? 'primary-action is-processing' : 'primary-action'}
-                disabled={!canGenerate}
-                onClick={onSubmit}
+                disabled={!canUseSubmitAction}
+                onClick={canSubmitGeneration ? onSubmit : onCredits}
               >
                 <SubmitIcon size={18} />
                 {submitLabel}

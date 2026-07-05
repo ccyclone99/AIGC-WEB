@@ -29,6 +29,7 @@ export function mapAssetDto(dto: AssetDto): Asset {
     type: dto.type,
     kind: dto.kind,
     image: dto.image,
+    videoSrc: dto.videoSrc,
     expires: dto.expiresLabel || formatExpiryLabel(dto.expiresAt),
     status: dto.status,
     source: dto.source,
@@ -65,6 +66,7 @@ export function mapGenerationTaskDto(dto: GenerationTaskDto): Task {
     cost: dto.cost,
     updated: formatRelativeTime(dto.updatedAt),
     image: dto.image,
+    videoSrc: dto.videoSrc,
     failure: dto.failure,
     params: {
       ...dto.params.outputSettings,
