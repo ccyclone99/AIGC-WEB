@@ -108,31 +108,40 @@ export function AssetManager({
         ))}
       </div>
 
-      <form className="asset-category-manager" onSubmit={handleCategorySubmit}>
-        <label>
-          <span>分类管理</span>
-          <input
-            value={newCategoryName}
-            maxLength={18}
-            placeholder="新增自定义分类"
-            onChange={(event) => setNewCategoryName(event.currentTarget.value)}
-          />
-        </label>
-        <button type="submit" className="secondary-action">
-          <Library size={16} />
-          添加分类
-        </button>
-        {customAssetFilters.length > 0 && (
-          <div className="asset-custom-category-row">
-            {customAssetFilters.map((filter) => (
-              <button type="button" key={filter} onClick={() => onDeleteAssetCategory(filter)}>
-                {filter}
-                <X size={14} />
-              </button>
-            ))}
-          </div>
-        )}
-      </form>
+      <details className="asset-category-manager">
+        <summary>
+          <span>
+            <strong>分类管理</strong>
+            <small>新增或删除自己的素材分类</small>
+          </span>
+          <em>{customAssetFilters.length} 个自定义</em>
+        </summary>
+        <form className="asset-category-form" onSubmit={handleCategorySubmit}>
+          <label>
+            <span>新增分类</span>
+            <input
+              value={newCategoryName}
+              maxLength={18}
+              placeholder="新增自定义分类"
+              onChange={(event) => setNewCategoryName(event.currentTarget.value)}
+            />
+          </label>
+          <button type="submit" className="secondary-action">
+            <Library size={16} />
+            添加分类
+          </button>
+          {customAssetFilters.length > 0 && (
+            <div className="asset-custom-category-row">
+              {customAssetFilters.map((filter) => (
+                <button type="button" key={filter} onClick={() => onDeleteAssetCategory(filter)}>
+                  {filter}
+                  <X size={14} />
+                </button>
+              ))}
+            </div>
+          )}
+        </form>
+      </details>
 
       <div className="asset-summary-row">
         <span>

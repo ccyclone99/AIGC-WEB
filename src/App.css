@@ -5647,17 +5647,66 @@ button.me-card {
 }
 
 .asset-category-manager {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafaf7;
+  overflow: hidden;
+}
+
+.asset-category-manager summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px;
+  color: var(--ink);
+  font-weight: 900;
+  cursor: pointer;
+  list-style: none;
+}
+
+.asset-category-manager summary::-webkit-details-marker {
+  display: none;
+}
+
+.asset-category-manager summary span,
+.asset-category-manager summary strong,
+.asset-category-manager summary small {
+  display: block;
+}
+
+.asset-category-manager summary small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.asset-category-manager summary em {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #5f5140;
+  font-size: 12px;
+  font-style: normal;
+  background: #fffaf0;
+}
+
+.asset-category-manager[open] summary {
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.asset-category-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: end;
   padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fafaf7;
 }
 
-.asset-category-manager label {
+.asset-category-form label {
   display: grid;
   gap: 6px;
   min-width: 0;
@@ -5666,7 +5715,7 @@ button.me-card {
   font-weight: 850;
 }
 
-.asset-category-manager input,
+.asset-category-form input,
 .asset-category-select select {
   width: 100%;
   min-height: 36px;
@@ -5677,7 +5726,7 @@ button.me-card {
   background: #fff;
 }
 
-.asset-category-manager input {
+.asset-category-form input {
   padding: 0 10px;
 }
 
@@ -7458,11 +7507,11 @@ summary:focus-visible {
     width: 100%;
   }
 
-  .asset-category-manager {
+  .asset-category-form {
     grid-template-columns: 1fr;
   }
 
-  .asset-category-manager .secondary-action {
+  .asset-category-form .secondary-action {
     width: 100%;
   }
 
@@ -8968,7 +9017,18 @@ summary:focus-visible {
 
   .home-entry-actions .primary-action,
   .home-entry-actions .secondary-action {
-    flex: 1 1 148px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .home-entry-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .home-entry-actions .primary-action {
+    grid-column: 1 / -1;
   }
 
   .home-kpi-row {
@@ -8990,7 +9050,6 @@ summary:focus-visible {
   .home-demo-status,
   .home-route-strip,
   .home-template-grid,
-  .production-metric-row,
   .production-template-lane,
   .task-console-stats,
   .me-console-kpis,
@@ -9083,7 +9142,23 @@ summary:focus-visible {
   }
 
   .production-upload-path {
-    min-height: 210px;
+    min-height: 168px;
+  }
+
+  .production-metric-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .production-metric-row span {
+    min-height: 62px;
+    padding: 8px 6px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .production-metric-row strong {
+    font-size: 21px;
   }
 
   .production-template-lane button {
