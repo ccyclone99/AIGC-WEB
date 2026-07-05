@@ -5,8 +5,7 @@ import { templateInputLabel } from '../domain'
 import { filterGroups, initialTasks } from '../prototypeData'
 import type { Template } from '../types'
 
-const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真']
-const hiddenCustomerFilters = new Set(['视频模板', '视频素材'])
+const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真', '视频模板']
 
 const isVideoTemplate = (template: Template) => template.category === '视频模板'
 
@@ -75,8 +74,10 @@ export function TemplatesView({
   onSearch,
   onToggleFilter,
 }: TemplatesViewProps) {
-  const customerTemplates = templates.filter((template) => !isVideoTemplate(template))
-  const usableCount = customerTemplates.length
+  const usableTemplates = templates.filter((template) => !isVideoTemplate(template))
+  const usableCount = usableTemplates.length
+  const previewOnlyCount = templates.length - usableCount
+  const heroTemplate = usableTemplates[0] ?? templates[0]
 
   return (
     <div className="page-stack template-page">
@@ -112,7 +113,7 @@ export function TemplatesView({
         </div>
         <div className="template-hero-preview-stack">
           <button type="button" className="hero-preview template-hero-main-preview" onClick={() => onOpenTemplate('watch')}>
-            <img src={customerTemplates[0]?.image ?? initialTasks[1].image} alt="精品表款模板预览" />
+            <img src={heroTemplate?.image ?? initialTasks[1].image} alt="精品表款模板预览" />
             <span>商品图输入</span>
             <em>8 秒质感转场 · 168 积分</em>
           </button>
@@ -139,7 +140,9 @@ export function TemplatesView({
           <Filter size={18} />
           {selectedFilters.length > 0 ? `筛选 ${selectedFilters.length}` : '筛选'}
         </button>
-        <span className="template-count-chip">{customerTemplates.length} 个模板</span>
+        <span className="template-count-chip">
+          {usableCount} 个可制作{previewOnlyCount > 0 ? ` · ${previewOnlyCount} 个预览` : ''}
+        </span>
       </section>
 
       <section className="template-mode-strip" aria-label="模板类型">
@@ -191,11 +194,11 @@ export function TemplatesView({
       )}
 
       <section className="template-grid">
-        {customerTemplates.map((template, index) => (
+        {templates.map((template, index) => (
           <TemplateCard key={template.id} index={index} template={template} onOpen={onOpenTemplate} />
         ))}
       </section>
-      {customerTemplates.length === 0 && (
+      {templates.length === 0 && (
         <section className="empty-state">
           <Search size={22} />
           <strong>没有匹配模板</strong>
@@ -353,9 +356,7 @@ export function FilterPanel({
         </button>
       </section>
       {filterGroups.map((group) => {
-        const customerItems = group.items.filter((item) => !hiddenCustomerFilters.has(item))
-        if (customerItems.length === 0) return null
-        return <FilterGroup key={group.title} items={customerItems} selectedFilters={selectedFilters} title={group.title} onToggle={onToggle} />
+        return <FilterGroup key={group.title} items={group.items} selectedFilters={selectedFilters} title={group.title} onToggle={onToggle} />
       })}
       <button type="button" className="primary-action" onClick={onApply}>
         应用筛选
