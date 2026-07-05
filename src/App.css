@@ -7222,13 +7222,24 @@ summary:focus-visible {
   }
 
   .template-insight-strip {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
   }
 
   .template-insight-strip span {
-    min-height: 48px;
-    padding: 8px 10px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    min-height: 54px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+
+  .template-insight-strip svg {
+    grid-row: auto;
+  }
+
+  .template-insight-strip small {
+    display: none;
   }
 
   .template-output-map {
@@ -9023,7 +9034,52 @@ summary:focus-visible {
   .production-primary-copy h2,
   .task-console-head h1,
   .me-console-head h1 {
-    font-size: 32px;
+    font-size: 30px;
+  }
+
+  .task-console-head,
+  .me-console-head {
+    gap: 10px;
+  }
+
+  .task-console-head p:not(.eyebrow),
+  .me-console-head p:not(.eyebrow) {
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .task-console-stats,
+  .me-console-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .task-console-stats span,
+  .me-console-kpis button {
+    min-height: 58px;
+    padding: 8px;
+  }
+
+  .task-console-stats strong,
+  .me-console-kpis strong {
+    font-size: 19px;
+  }
+
+  .me-console-kpis button {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .me-console-kpis svg {
+    width: 30px;
+    height: 30px;
+    padding: 7px;
+  }
+
+  .me-console-kpis span {
+    font-size: 11px;
   }
 
   .production-upload-path {
@@ -9063,8 +9119,50 @@ summary:focus-visible {
     font-size: 12px;
   }
 
+  .task-row {
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .task-row img {
+    height: 58px;
+  }
+
+  .task-row-copy {
+    gap: 4px;
+  }
+
+  .task-row-copy > small {
+    font-size: 12px;
+  }
+
+  .task-row-side {
+    display: none;
+  }
+
   .me-console-tabs {
     position: static;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .me-console-tabs button {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    min-height: 58px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+
+  .me-console-tabs button > svg {
+    display: none;
+  }
+
+  .me-console-tabs small,
+  .me-console-tabs em {
+    display: none;
   }
 }
 
