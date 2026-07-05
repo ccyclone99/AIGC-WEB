@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowRight, BadgeCheck, Coins, FileVideo, Filter, ImageUp, Play, Search, ShieldCheck, WandSparkles, X } from 'lucide-react'
 
 import { templateInputLabel } from '../domain'
@@ -6,6 +6,8 @@ import { filterGroups, initialTasks } from '../prototypeData'
 import type { Template } from '../types'
 
 const quickTemplateFilters = ['商品图成片', '电商短视频', '人像写真', '视频模板']
+
+type TemplateShelfMode = 'ready' | 'preview'
 
 const isVideoTemplate = (template: Template) => template.category === '视频模板'
 
@@ -75,9 +77,35 @@ export function TemplatesView({
   onToggleFilter,
 }: TemplatesViewProps) {
   const usableTemplates = templates.filter((template) => !isVideoTemplate(template))
+  const previewTemplates = templates.filter(isVideoTemplate)
   const usableCount = usableTemplates.length
-  const previewOnlyCount = templates.length - usableCount
+  const previewOnlyCount = previewTemplates.length
   const heroTemplate = usableTemplates[0] ?? templates[0]
+  const [shelfMode, setShelfMode] = useState<TemplateShelfMode>('ready')
+  const displayedTemplates = shelfMode === 'preview' ? previewTemplates : usableTemplates
+  const emptyModeCopy =
+    shelfMode === 'preview'
+      ? '当前筛选下没有视频预览模板。换一个关键词，或清空筛选条件。'
+      : '当前筛选下没有可直接制作的模板。换一个关键词，或查看视频预览。'
+
+  useEffect(() => {
+    if (shelfMode === 'ready' && usableTemplates.length === 0 && previewTemplates.length > 0) {
+      setShelfMode('preview')
+    }
+    if (shelfMode === 'preview' && previewTemplates.length === 0 && usableTemplates.length > 0) {
+      setShelfMode('ready')
+    }
+  }, [previewTemplates.length, shelfMode, usableTemplates.length])
+
+  const handleClearFilters = () => {
+    setShelfMode('ready')
+    onClearFilters()
+  }
+
+  const handleQuickFilter = (filter: string) => {
+    setShelfMode(filter === '视频模板' ? 'preview' : 'ready')
+    onToggleFilter(filter)
+  }
 
   return (
     <div className="page-stack template-page">
@@ -145,8 +173,35 @@ export function TemplatesView({
         </span>
       </section>
 
+      <section className="template-shelf-tabs" aria-label="模板分组">
+        <button
+          type="button"
+          className={shelfMode === 'ready' ? 'is-selected' : ''}
+          disabled={usableCount === 0}
+          onClick={() => setShelfMode('ready')}
+        >
+          <span>
+            <strong>可制作模板</strong>
+            <small>上传图片后直接进入创作台</small>
+          </span>
+          <em>{usableCount}</em>
+        </button>
+        <button
+          type="button"
+          className={shelfMode === 'preview' ? 'is-selected' : ''}
+          disabled={previewOnlyCount === 0}
+          onClick={() => setShelfMode('preview')}
+        >
+          <span>
+            <strong>视频预览</strong>
+            <small>视频二创类模板，当前先看样片</small>
+          </span>
+          <em>{previewOnlyCount}</em>
+        </button>
+      </section>
+
       <section className="template-mode-strip" aria-label="模板类型">
-        <button type="button" className={selectedFilters.length === 0 ? 'is-selected' : ''} onClick={onClearFilters}>
+        <button type="button" className={selectedFilters.length === 0 ? 'is-selected' : ''} onClick={handleClearFilters}>
           推荐
         </button>
         {quickTemplateFilters.map((filter) => (
@@ -154,7 +209,7 @@ export function TemplatesView({
             type="button"
             key={filter}
             className={selectedFilters.includes(filter) ? 'is-selected' : ''}
-            onClick={() => onToggleFilter(filter)}
+            onClick={() => handleQuickFilter(filter)}
           >
             {filter}
           </button>
@@ -187,22 +242,22 @@ export function TemplatesView({
               <X size={13} />
             </button>
           ))}
-          <button type="button" className="clear-filter-button" onClick={onClearFilters}>
+          <button type="button" className="clear-filter-button" onClick={handleClearFilters}>
             清空
           </button>
         </div>
       )}
 
       <section className="template-grid">
-        {templates.map((template, index) => (
+        {displayedTemplates.map((template, index) => (
           <TemplateCard key={template.id} index={index} template={template} onOpen={onOpenTemplate} />
         ))}
       </section>
-      {templates.length === 0 && (
+      {displayedTemplates.length === 0 && (
         <section className="empty-state">
           <Search size={22} />
           <strong>没有匹配模板</strong>
-          <span>换一个关键词，或清空筛选条件。</span>
+          <span>{emptyModeCopy}</span>
         </section>
       )}
     </div>

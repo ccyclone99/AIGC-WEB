@@ -3360,6 +3360,73 @@
   background: #fff;
 }
 
+.template-shelf-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.template-shelf-tabs button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-height: 66px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  text-align: left;
+  background: #fff;
+  cursor: pointer;
+}
+
+.template-shelf-tabs button.is-selected {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.template-shelf-tabs button:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
+.template-shelf-tabs span,
+.template-shelf-tabs strong,
+.template-shelf-tabs small {
+  display: block;
+  min-width: 0;
+}
+
+.template-shelf-tabs strong {
+  font-size: 15px;
+}
+
+.template-shelf-tabs small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.template-shelf-tabs em {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: #111;
+  font-style: normal;
+  font-weight: 900;
+  background: var(--soft);
+}
+
+.template-shelf-tabs button.is-selected em {
+  color: #fff;
+  background: #111;
+}
+
 .template-mode-strip {
   display: flex;
   gap: 8px;
@@ -7263,6 +7330,24 @@ summary:focus-visible {
   .template-mode-strip {
     flex-wrap: wrap;
     overflow: visible;
+  }
+
+  .template-shelf-tabs {
+    gap: 6px;
+  }
+
+  .template-shelf-tabs button {
+    min-height: 54px;
+    padding: 8px;
+  }
+
+  .template-shelf-tabs small {
+    display: none;
+  }
+
+  .template-shelf-tabs em {
+    min-width: 30px;
+    height: 30px;
   }
 
   .template-mode-strip button {
