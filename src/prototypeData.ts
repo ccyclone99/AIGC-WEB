@@ -55,6 +55,7 @@ const createTemplateConfig = ({
   settlement: 'freeze_then_settle',
   inputFields,
   outputFields: ['ratio', 'duration', 'resolution', 'quality'],
+  userEditableOutputFields: [],
   capabilities,
   traceFields: templateTraceFields,
 })
@@ -63,7 +64,7 @@ const productImageInput: TemplateInputField = {
   id: 'productImage',
   label: '商品图',
   required: true,
-  acceptedKinds: ['image', 'portrait', 'logo'],
+  acceptedKinds: ['image'],
   maxCount: 1,
   binding: 'imageId',
   help: '第一版只需要一张图片，后端提交时保存为 inputAssetIds。',
@@ -73,7 +74,7 @@ const portraitInput: TemplateInputField = {
   id: 'portraitImage',
   label: '人像照片',
   required: true,
-  acceptedKinds: ['portrait', 'image'],
+  acceptedKinds: ['portrait'],
   maxCount: 1,
   binding: 'portraitId',
   help: '需要保留授权和同意记录，后端提交时关联 consent record。',
@@ -93,7 +94,7 @@ export const templates: Template[] = [
   {
     id: 'watch',
     title: '精品表款 8 秒转场',
-    category: '商品图成片',
+    category: '商品展示',
     scenario: '高客单商品',
     image:
       'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=80',
@@ -114,8 +115,8 @@ export const templates: Template[] = [
   {
     id: 'sneaker',
     title: '潮鞋爆款节奏',
-    category: '电商短视频',
-    scenario: '短视频投放',
+    category: '投放短视频',
+    scenario: '鞋服新品推广',
     image:
       'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80',
     cost: 138,
@@ -135,7 +136,7 @@ export const templates: Template[] = [
   {
     id: 'beauty',
     title: '美妆成分展示',
-    category: '商品图成片',
+    category: '商品展示',
     scenario: '小红书种草',
     image:
       'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80',
@@ -177,7 +178,7 @@ export const templates: Template[] = [
   {
     id: 'bag',
     title: '包袋细节巡游',
-    category: '商品图成片',
+    category: '商品展示',
     scenario: '详情页增强',
     image:
       'https://images.unsplash.com/photo-1547949003-9792a18a2601?auto=format&fit=crop&w=900&q=80',
@@ -198,7 +199,7 @@ export const templates: Template[] = [
   {
     id: 'coffee',
     title: '食品饮品氛围片',
-    category: '电商短视频',
+    category: '投放短视频',
     scenario: '生活方式',
     image:
       'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=80',
@@ -219,7 +220,7 @@ export const templates: Template[] = [
   {
     id: 'video-polish',
     title: '已有视频投放翻新',
-    category: '视频模板',
+    category: '视频二创',
     scenario: '素材二创',
     image:
       'https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=900&q=80',
@@ -241,7 +242,7 @@ export const templates: Template[] = [
   {
     id: 'talking-cut',
     title: '口播视频切片包装',
-    category: '视频模板',
+    category: '视频二创',
     scenario: '达人/直播切片',
     image:
       'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=900&q=80',
@@ -263,7 +264,7 @@ export const templates: Template[] = [
   {
     id: 'video-product-card',
     title: '视频素材商品卡包装',
-    category: '视频模板',
+    category: '视频二创',
     scenario: '详情页/投流',
     image:
       'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
@@ -341,7 +342,7 @@ export const initialTasks: Task[] = [
       stage: 'provider',
       code: 'PROVIDER_502_RETRY_EXHAUSTED',
       retryable: true,
-      message: '生成服务暂时异常，冻结积分已释放。',
+      message: '生成服务暂时异常，积分已经退回。',
     },
     params: {
       templateId: 'beauty',
@@ -369,7 +370,7 @@ export const initialTasks: Task[] = [
       stage: 'moderation',
       code: 'MODERATION_RIGHTS_REVIEW_BLOCKED',
       retryable: false,
-      message: '素材需要重新确认授权，系统已释放冻结积分。',
+      message: '素材需要重新确认授权，积分已经退回。',
     },
     params: {
       templateId: 'bag',
@@ -397,7 +398,7 @@ export const initialTasks: Task[] = [
       stage: 'input',
       code: 'INPUT_IMAGE_TOO_BLURRY',
       retryable: true,
-      message: '输入图片清晰度不足，未进入供应商生成，冻结积分已释放。',
+      message: '图片清晰度不足，积分已经退回。',
     },
     params: {
       templateId: 'watch',
@@ -417,7 +418,7 @@ export const initialTasks: Task[] = [
 export const initialAssets: Asset[] = [
   {
     id: 'A-WATCH-MAIN',
-    name: 'watch-main.jpg',
+    name: '白色腕表主图.jpg',
     type: '商品主图',
     kind: 'image',
     image: templates[0].image,
@@ -427,22 +428,22 @@ export const initialAssets: Asset[] = [
   },
   {
     id: 'A-SNEAKER-OUTPUT',
-    name: 'sneaker-output.mp4',
+    name: '潮鞋短视频.mp4',
     type: '生成视频',
     kind: 'video',
     image: templates[1].image,
     videoSrc: videoPreviewSrc,
     expires: '29 天后过期',
     status: 'library',
-    source: '任务输出',
+    source: '生成结果',
   },
   {
     id: 'A-PORTRAIT-REF',
-    name: 'portrait-ref.jpg',
+    name: '海边人像参考.jpg',
     type: '人像素材',
     kind: 'portrait',
     image: templates[3].image,
-    expires: '需授权复用',
+    expires: '使用前确认肖像授权',
     status: 'library',
     source: '用户上传',
   },
@@ -451,62 +452,62 @@ export const initialAssets: Asset[] = [
 export const initialLedgerRows: LedgerRow[] = [
   {
     id: 'L-240625-004',
-    title: '潮鞋任务冻结',
+    title: '潮鞋爆款节奏',
     amount: '-138',
-    source: '预扣冻结',
+    source: '生成预留',
     kind: 'freeze',
     status: 'frozen',
     refId: 'T-240625-019',
     time: '2 分钟前',
-    note: '任务处理中，完成后结算，失败或超时释放。',
+    note: '生成时暂时预留，未完成会自动退回。',
   },
   {
     id: 'L-240625-003',
-    title: '精品表款生成成功',
+    title: '精品表款 8 秒转场',
     amount: '-168',
-    source: '任务结算',
+    source: '视频生成',
     kind: 'settlement',
     status: 'settled',
     refId: 'T-240625-018',
     time: '18 分钟前',
-    note: '生成成功，冻结积分转为实际消耗。',
+    note: '视频已生成并保存到素材。',
   },
   {
     id: 'L-240625-002',
-    title: '美妆任务失败释放',
+    title: '美妆成分展示',
     amount: '+198',
-    source: '失败退回',
+    source: '自动退回',
     kind: 'release',
     status: 'released',
     refId: 'T-240625-017',
     time: '42 分钟前',
-    note: '任务失败，冻结积分已释放回可用余额。',
+    note: '本次未生成成功，积分已经退回。',
   },
   {
     id: 'L-240625-001B',
-    title: '包袋任务积分释放',
+    title: '包袋细节巡游',
     amount: '+176',
-    source: '内容确认',
+    source: '自动退回',
     kind: 'release',
     status: 'released',
     refId: 'T-240625-016',
     time: '1 小时前',
-    note: '素材需要重新确认授权，冻结积分已释放回可用余额。',
+    note: '素材需要重新确认授权，积分已经退回。',
   },
   {
     id: 'L-240625-001A',
-    title: '表款素材无效释放',
+    title: '精品表款 8 秒转场',
     amount: '+168',
-    source: '输入校验',
+    source: '自动退回',
     kind: 'release',
     status: 'released',
     refId: 'T-240625-015',
     time: '2 小时前',
-    note: '输入图片未通过校验，冻结积分已释放。',
+    note: '图片未通过检查，积分已经退回。',
   },
   {
     id: 'L-240625-001',
-    title: '新用户注册赠送',
+    title: '新用户注册奖励',
     amount: '+300',
     source: '活动赠送',
     kind: 'reward',
@@ -520,14 +521,17 @@ export const initialLedgerRows: LedgerRow[] = [
 export const activeStatuses: TaskStatus[] = ['queued', 'running', 'rendering', 'review']
 
 export const rechargePackages: RechargePackage[] = [
-  { name: '入门包', price: '¥29', credits: 300, bonus: '适合轻量试用' },
-  { name: '标准包', price: '¥99', credits: 1200, bonus: '电商日常推荐' },
-  { name: '增长包', price: '¥299', credits: 4000, bonus: '含团队试跑额度' },
+  { id: 'starter-300', name: '入门包', amountMinor: 2900, currency: 'CNY', price: '¥29', credits: 300, bonus: '适合轻量试用' },
+  { id: 'standard-1200', name: '标准包', amountMinor: 9900, currency: 'CNY', price: '¥99', credits: 1200, bonus: '电商日常推荐' },
+  { id: 'growth-4000', name: '增长包', amountMinor: 29900, currency: 'CNY', price: '¥299', credits: 4000, bonus: '适合批量制作' },
 ]
 
 export const initialPaymentOrder: PaymentOrder = {
   id: 'PAY-READY',
+  packageId: 'standard-1200',
   packageName: '标准包',
+  amountMinor: 9900,
+  currency: 'CNY',
   amount: '¥99',
   credits: 1200,
   status: 'idle',
@@ -549,7 +553,7 @@ export const signupRiskChecks: SignupRiskCheck[] = [
     id: 'ip',
     label: '活动',
     status: 'review',
-    value: '规则校验中',
+    value: '确认中',
     note: '活动积分按页面规则发放。',
   },
   {
@@ -566,8 +570,8 @@ export const initialUploadReceipt: UploadReceipt = {
   fileName: '等待上传',
   status: 'idle',
   progress: 0,
-  source: '资产库',
-  message: '上传图片会自动加入资产库。',
+  source: '素材',
+  message: '上传后的图片会自动保存。',
 }
 
 export const initialQrLoginSession: QrLoginSession = {
@@ -579,7 +583,7 @@ export const initialQrLoginSession: QrLoginSession = {
 }
 
 export const filterGroups: FilterGroup[] = [
-  { title: '内容类型', items: ['商品图成片', '电商短视频', '视频模板', '人像写真'] },
+  { title: '内容类型', items: ['商品展示', '投放短视频', '视频二创', '人像写真'] },
   { title: '输入要求', items: ['只需图片', '人像照片', '视频素材'] },
   { title: '输出比例', items: ['9:16', '4:5', '1:1'] },
   { title: '积分区间', items: ['100-150', '150-200', '200+'] },
@@ -588,11 +592,11 @@ export const filterGroups: FilterGroup[] = [
 export const outputOptionGroups: OutputOptionGroup[] = [
   { key: 'ratio', label: '画面比例', options: ['9:16', '4:5', '1:1', '16:9'], hint: '按投放平台选择。' },
   { key: 'duration', label: '视频长度', options: ['6s', '8s', '10s', '12s'], hint: '越长越适合展示细节。' },
-  { key: 'resolution', label: '图片分辨率', options: ['720p', '1080p', '2K'], hint: '默认 1080p。' },
-  { key: 'quality', label: '清晰度', options: ['标准', '高清', '超清'], hint: '超清优先保证细节。' },
+  { key: 'resolution', label: '输出分辨率', options: ['720p', '1080p', '2K'], hint: '默认 1080p。' },
+  { key: 'quality', label: '画质', options: ['标准', '高清', '超清'], hint: '超清会保留更多细节。' },
 ]
 
-export const baseAssetFilters: AssetFilter[] = ['全部', '商品主图', '人像素材', '生成视频', 'Logo', '即将过期', '已归档']
-export const customAssetFilterSeed: AssetFilter[] = ['618 活动']
+export const baseAssetFilters: AssetFilter[] = ['全部', '商品主图', '人像素材', '生成视频', '品牌标识', '即将过期', '已归档']
+export const customAssetFilterSeed: AssetFilter[] = []
 export const maxUploadSize = 8 * 1024 * 1024
 export const showTaskDevControls = false

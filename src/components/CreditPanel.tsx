@@ -16,9 +16,9 @@ type CreditPanelProps = {
 
 const ledgerStatusLabel = (status: LedgerStatus) => {
   const statusMap: Record<LedgerStatus, string> = {
-    frozen: '冻结中',
-    settled: '已结算',
-    released: '已释放',
+    frozen: '生成中',
+    settled: '已使用',
+    released: '已退回',
     credited: '已到账',
     granted: '已赠送',
   }
@@ -50,35 +50,15 @@ export function CreditPanel({
 }: CreditPanelProps) {
   const [selectedPackageName, setSelectedPackageName] = useState(() => packages[1]?.name ?? packages[0]?.name ?? '')
   const selectedPackage = packages.find((pack) => pack.name === selectedPackageName) ?? packages[0]
-  const totalCredits = balance + frozenCredits
-  const frozenLedgerCount = ledgerRows.filter((row) => row.status === 'frozen').length
   const hasPendingOrder = paymentOrder.status === 'pending'
   const orderStatus = paymentOrderStatusLabel(paymentOrder.status)
 
   return (
     <div className="credit-panel">
       <section className="balance-card">
-        <p className="eyebrow">当前余额</p>
+        <p className="eyebrow">可用积分</p>
         <strong>{balance.toLocaleString()}</strong>
-        <span>{frozenCredits} 积分冻结中。活动赠送积分默认输出带水印。</span>
-      </section>
-      <section className="credit-state-grid">
-        <span>
-          <small>可用积分</small>
-          <strong>{balance.toLocaleString()}</strong>
-        </span>
-        <span>
-          <small>冻结积分</small>
-          <strong>{frozenCredits.toLocaleString()}</strong>
-        </span>
-        <span>
-          <small>账户总额</small>
-          <strong>{totalCredits.toLocaleString()}</strong>
-        </span>
-        <span>
-          <small>冻结记录</small>
-          <strong>{frozenLedgerCount}</strong>
-        </span>
+        <span>另有 {frozenCredits} 积分用于正在生成的任务。</span>
       </section>
       <div className="package-grid">
         {packages.map((pack) => (
@@ -88,7 +68,7 @@ export function CreditPanel({
             key={pack.name}
             onClick={() => {
               setSelectedPackageName(pack.name)
-              onToast({ title: '充值包已选择', text: `${pack.name} 可继续完成支付。` })
+              onToast({ title: '充值包已选择', text: `${pack.name} 可以继续支付。` })
             }}
           >
             <span>{pack.name}</span>
@@ -106,19 +86,21 @@ export function CreditPanel({
         <Wallet size={18} />
         {hasPendingOrder ? '等待支付完成' : '立即充值'}
       </button>
-      <section className={`payment-order-panel order-${paymentOrder.status}`}>
-        <span>
-          <QrCode size={18} />
-          {orderStatus}
-        </span>
-        <span>
-          <strong>{paymentOrder.packageName} · {paymentOrder.amount}</strong>
-          <small>
-            {paymentOrder.credits.toLocaleString()} 积分 · {paymentOrder.channel} · {paymentOrder.createdAt} · {paymentOrder.expiresIn}
-          </small>
-          <em>{paymentOrder.note}</em>
-        </span>
-      </section>
+      {paymentOrder.status !== 'idle' && (
+        <section className={`payment-order-panel order-${paymentOrder.status}`}>
+          <span>
+            <QrCode size={18} />
+            {orderStatus}
+          </span>
+          <span>
+            <strong>{paymentOrder.packageName} · {paymentOrder.amount}</strong>
+            <small>
+              {paymentOrder.credits.toLocaleString()} 积分 · {paymentOrder.channel} · {paymentOrder.createdAt} · {paymentOrder.expiresIn}
+            </small>
+            <em>{paymentOrder.note}</em>
+          </span>
+        </section>
+      )}
       <section className="ledger-list">
         {ledgerRows.map((row) => (
           <div className={`ledger-row ledger-${row.status}`} key={row.id}>

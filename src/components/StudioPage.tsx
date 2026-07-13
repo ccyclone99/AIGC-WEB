@@ -1,13 +1,11 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import {
-  ArrowUpRight,
   CheckCircle2,
-  ClipboardCheck,
+  ChevronRight,
   Clock3,
   Coins,
   FileVideo,
   ImagePlus,
-  Images,
   PackageCheck,
   Play,
   ShieldCheck,
@@ -19,9 +17,14 @@ import {
   X,
 } from 'lucide-react'
 
-import { generationIdempotencyKey, sameOutputSettings, templateInputLabel } from '../domain'
+import {
+  canUseAssetForTemplate,
+  generationIdempotencyKey,
+  sameOutputSettings,
+  userEditableOutputFieldsForTemplate,
+} from '../domain'
 import { activeStatuses, outputOptionGroups } from '../prototypeData'
-import type { Asset, OutputSettingKey, OutputSettings, Task, Template } from '../types'
+import type { Asset, OutputSettingKey, OutputSettings, PreviewMedia, Task, Template } from '../types'
 
 type StudioPageProps = {
   assets: Asset[]
@@ -31,12 +34,13 @@ type StudioPageProps = {
   tasks: Task[]
   template: Template
   onAssetSelect: (assetId: string) => void
+  onChangeTemplate: () => void
   onCredits: () => void
   onOpenAssetPicker: () => void
   onOpenTask: (taskId: string) => void
   onOutputSettingChange: (key: OutputSettingKey, value: string) => void
-  onPreview: (title: string, image: string) => void
-  onSubmit: () => void
+  onPreview: (title: string, image: string, media?: Partial<Pick<PreviewMedia, 'kind' | 'videoSrc'>>) => void
+  onSubmit: (portraitConsentConfirmed?: boolean) => void
 }
 
 export function StudioPage({
@@ -47,6 +51,7 @@ export function StudioPage({
   tasks,
   template,
   onAssetSelect,
+  onChangeTemplate,
   onCredits,
   onOpenAssetPicker,
   onOpenTask,
@@ -54,10 +59,22 @@ export function StudioPage({
   onPreview,
   onSubmit,
 }: StudioPageProps) {
-  const selectedAsset = selectedAssetId ? assets.find((asset) => asset.id === selectedAssetId) : undefined
+  const selectedAsset = selectedAssetId
+    ? assets.find((asset) => asset.id === selectedAssetId && canUseAssetForTemplate(asset, template))
+    : undefined
+  const isPortraitTemplate = template.config.workflowType === 'portrait-to-video'
+  const inputNoun = isPortraitTemplate ? '人像照片' : '商品图'
+  const creationTitle = isPortraitTemplate ? '人像写真制作' : '商品视频制作'
+  const creationSubtitle = isPortraitTemplate
+    ? '选择一张已获授权的人像照片，确认授权后提交生成。'
+    : '上传一张商品图，确认后即可提交生成。'
   const totalCost = template.cost
   const hasSelectedAsset = Boolean(selectedAsset?.image)
   const hasEnoughCredits = creditBalance >= totalCost
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [portraitConsentConfirmed, setPortraitConsentConfirmed] = useState(false)
+  const requiresPortraitConsent = template.config.workflowType === 'portrait-to-video'
+  const hasRequiredConsent = !requiresPortraitConsent || portraitConsentConfirmed
   const currentIdempotencyKey = selectedAsset ? generationIdempotencyKey(template, selectedAsset, outputSettings) : ''
   const duplicateTask = selectedAsset
     ? tasks.find(
@@ -70,45 +87,61 @@ export function StudioPage({
               sameOutputSettings(task.params, outputSettings))),
       )
     : undefined
-  const canSubmitGeneration = hasSelectedAsset && hasEnoughCredits && !duplicateTask
-  const canUseSubmitAction = hasSelectedAsset && !duplicateTask
+  const canUseSubmitAction = hasSelectedAsset && !duplicateTask && (hasRequiredConsent || !hasEnoughCredits)
   const settingSummary = `${outputSettings.ratio} · ${outputSettings.duration} · ${outputSettings.resolution} · ${outputSettings.quality}`
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const editableOutputGroups = outputOptionGroups.filter((group) =>
+    userEditableOutputFieldsForTemplate(template).includes(group.key),
+  )
   const backgroundTasks = tasks.filter((task) => activeStatuses.includes(task.status)).slice(0, 3)
   const latestBackgroundTask = backgroundTasks[0]
   const submitHint = !hasSelectedAsset
-    ? '选择商品图后即可提交生成。'
+    ? `选择${inputNoun}后即可提交生成。`
     : duplicateTask
-      ? '当前图片和设置正在生成中。换图，或调整高级设置生成新版本。'
-    : hasEnoughCredits
-      ? `${settingSummary} · 提交后自动生成，失败或超时自动释放积分。`
+      ? '当前素材正在生成中。可以更换素材后再生成新版本。'
+      : !hasRequiredConsent
+        ? '请先确认已获得人物肖像授权。'
+      : hasEnoughCredits
+      ? '生成失败会退回积分，完成后自动保存到作品库。'
       : `可用 ${creditBalance} 积分，还差 ${totalCost - creditBalance} 积分。`
   const submitLabel = !hasSelectedAsset
-    ? '选择图片后生成'
+    ? `选择${inputNoun}后生成`
     : duplicateTask
       ? '生成中'
+      : !hasRequiredConsent
+        ? '确认授权后生成'
       : hasEnoughCredits
         ? '生成视频'
         : '积分不足，去充值'
-  const SubmitIcon = duplicateTask ? Clock3 : hasEnoughCredits ? WandSparkles : Wallet
+  const SubmitIcon = duplicateTask ? Clock3 : !hasRequiredConsent ? ShieldCheck : hasEnoughCredits ? WandSparkles : Wallet
+
+  useEffect(() => {
+    setPortraitConsentConfirmed(false)
+  }, [template.id])
+
+  const handleSubmit = () => {
+    if (!hasEnoughCredits) {
+      onCredits()
+      return
+    }
+    onSubmit(portraitConsentConfirmed)
+  }
 
   return (
     <div className="studio-page-v3 make-simple-page make-console-page">
       <section className="make-simple-card make-console-card" style={{ '--template-accent': template.accent } as CSSProperties}>
         <header className="make-simple-head make-console-head studio-editor-head">
           <div className="make-console-title">
-            <p className="eyebrow">创作台</p>
-            <h1>商品视频制作</h1>
-            <span>上传一张商品图，确认画面设置后提交生成。</span>
+            <h1>{creationTitle}</h1>
+            <span>{creationSubtitle}</span>
           </div>
-          <div className="make-template-chip">
+          <button type="button" className="make-template-chip" onClick={onChangeTemplate} title="更换模板">
             <PackageCheck size={17} />
             <span>
-              <small>当前模板</small>
+              <small>模板</small>
               <strong>{template.title}</strong>
             </span>
-            <em>{outputSettings.ratio} · {outputSettings.duration}</em>
-          </div>
+            <em>更换 <ChevronRight size={14} /></em>
+          </button>
         </header>
 
         <div className="make-simple-grid image-only-grid make-console-layout">
@@ -118,35 +151,27 @@ export function StudioPage({
                 <Sparkles size={16} />
                 视频画面预览
               </span>
-              <em>{template.config.workflowLabel}</em>
+              <em>{outputSettings.duration} · {outputSettings.ratio}</em>
             </div>
             {selectedAsset ? (
               <button type="button" className="image-upload-card studio-stage-card" onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}>
-                <img src={selectedAsset.image} alt={`${selectedAsset.name} 当前商品`} />
+                <img src={selectedAsset.image} alt={`${selectedAsset.name} 当前${inputNoun}`} />
                 <span className="studio-stage-badge">
                   <FileVideo size={15} />
                   输出 {outputSettings.duration} 视频
                 </span>
                 <span className="studio-stage-ratio">{outputSettings.ratio}</span>
-                <span className="image-upload-status">
-                  <CheckCircle2 size={18} />
-                  图片已就绪
-                </span>
               </button>
             ) : (
               <button type="button" className="image-upload-card image-upload-empty studio-stage-card" onClick={onOpenAssetPicker}>
-                <ImagePlus size={34} />
-                <strong>选择商品图</strong>
-                <span>从资产库选择，或上传新图片</span>
+                <img src={template.image} alt="" />
+                <span className="image-upload-empty-content">
+                  <ImagePlus size={34} />
+                  <strong>选择{inputNoun}</strong>
+                  <span>使用“{template.title}”生成视频</span>
+                </span>
               </button>
             )}
-            <div className="studio-stage-footer">
-              <span>
-                <ClipboardCheck size={15} />
-                素材、设置和积分记录会自动保存
-              </span>
-              <em>{hasSelectedAsset ? selectedAsset?.source : '等待素材'}</em>
-            </div>
           </section>
 
           <section className="make-form-panel image-only-copy make-control-panel studio-control-tower">
@@ -154,31 +179,14 @@ export function StudioPage({
               <div className="make-panel-heading">
                 <span>
                   <p className="eyebrow">输入素材</p>
-                  <h2>{selectedAsset?.name ?? '等待选择商品图'}</h2>
+                  <h2>{selectedAsset?.name ?? `等待选择${inputNoun}`}</h2>
                 </span>
-                <em className={selectedAsset ? 'is-ready' : 'is-waiting'}>
-                  {selectedAsset ? '已就绪' : '未选择'}
-                </em>
-              </div>
-              <p>图片可来自资产库，也可以直接上传；提交后会保存到生成记录。</p>
-              <div className="studio-asset-state make-asset-state">
-                <span>
-                  <Images size={15} />
-                  {selectedAsset ? selectedAsset.type : templateInputLabel(template)}
-                </span>
-                <span>
-                  <ShieldCheck size={15} />
-                  {selectedAsset ? selectedAsset.expires : '上传后保存'}
-                </span>
-                <span>
-                  <ClipboardCheck size={15} />
-                  设置已保存
-                </span>
+                {!selectedAsset && <em className="is-waiting">未选择</em>}
               </div>
               <div className="make-upload-actions make-console-actions">
                 <button type="button" className="secondary-action upload-inline-button make-replace-action" onClick={onOpenAssetPicker}>
                   <Upload size={18} />
-                  {selectedAsset ? '替换图片' : '选择图片'}
+                  {selectedAsset ? `替换${inputNoun}` : `选择${inputNoun}`}
                 </button>
                 {selectedAsset && (
                   <>
@@ -207,34 +215,38 @@ export function StudioPage({
               </div>
             </div>
 
-            <section className="make-settings-shell">
+            {editableOutputGroups.length > 0 && <section className="make-settings-shell">
               <button
                 type="button"
                 className="make-settings-button"
+                aria-label={`输出设置，${settingSummary}`}
                 aria-expanded={settingsOpen}
                 onClick={() => setSettingsOpen((current) => !current)}
               >
                 <span>
                   <SlidersHorizontal size={17} />
-                  高级设置
+                  输出设置
                 </span>
-                <em>{settingSummary}</em>
+                <em>
+                  <span className="setting-summary-full">{settingSummary}</span>
+                  <span className="setting-summary-compact">{outputSettings.resolution} · {outputSettings.quality}</span>
+                </em>
               </button>
 
               {settingsOpen && (
                 <div className="make-settings-popover">
                   <header>
                     <span>
-                      <strong>高级设置</strong>
-                      <small>默认参数已按模板推荐，可以不改。</small>
+                      <strong>输出设置</strong>
+                      <small>只调整当前模板允许修改的项目。</small>
                     </span>
-                    <button type="button" className="close-button" onClick={() => setSettingsOpen(false)} aria-label="关闭高级设置">
+                    <button type="button" className="close-button" onClick={() => setSettingsOpen(false)} aria-label="关闭输出设置">
                       <X size={17} />
                     </button>
                   </header>
 
                   <div className="output-setting-grid">
-                    {outputOptionGroups.map((group) => (
+                    {editableOutputGroups.map((group) => (
                       <section className="output-setting-card" key={group.key}>
                         <div>
                           <strong>{group.label}</strong>
@@ -255,7 +267,6 @@ export function StudioPage({
                       </section>
                     ))}
                   </div>
-                  <p className="setting-note">这些设置会随生成记录保存，方便后续复用。</p>
                   <div className="make-settings-footer">
                     <button type="button" className="primary-action" onClick={() => setSettingsOpen(false)}>
                       <CheckCircle2 size={17} />
@@ -264,31 +275,28 @@ export function StudioPage({
                   </div>
                 </div>
               )}
-            </section>
+            </section>}
 
-            <section className="make-ready-checks" aria-label="提交前检查">
-              <span className={hasSelectedAsset ? 'is-ready' : 'is-waiting'}>
-                <CheckCircle2 size={15} />
-                <strong>素材</strong>
-                <em>{hasSelectedAsset ? '已选择' : '未选择'}</em>
-              </span>
-              <span className="is-ready">
-                <SlidersHorizontal size={15} />
-                <strong>参数</strong>
-                <em>{outputSettings.duration} / {outputSettings.resolution}</em>
-              </span>
-              <span className={hasEnoughCredits ? 'is-ready' : 'is-waiting'}>
-                <Coins size={15} />
-                <strong>积分</strong>
-                <em>{hasEnoughCredits ? '可冻结' : `差 ${totalCost - creditBalance}`}</em>
-              </span>
-            </section>
+            {requiresPortraitConsent && (
+              <label className="portrait-consent-row">
+                <input
+                  type="checkbox"
+                  checked={portraitConsentConfirmed}
+                  onChange={(event) => setPortraitConsentConfirmed(event.currentTarget.checked)}
+                />
+                <ShieldCheck size={18} />
+                <span>
+                  <strong>确认肖像授权</strong>
+                  <small>我已获得照片中人物授权，并同意将其用于本次视频生成。</small>
+                </span>
+              </label>
+            )}
 
             <section className="make-submit-panel">
               <div className="make-submit-copy">
                 <span>
                   <Coins size={17} />
-                  准备生成
+                  预计消耗
                 </span>
                 <strong>{totalCost} 积分</strong>
                 <p>{submitHint}</p>
@@ -297,35 +305,48 @@ export function StudioPage({
                 type="button"
                 className={duplicateTask ? 'primary-action is-processing' : 'primary-action'}
                 disabled={!canUseSubmitAction}
-                onClick={canSubmitGeneration ? onSubmit : onCredits}
+                onClick={handleSubmit}
               >
                 <SubmitIcon size={18} />
                 {submitLabel}
               </button>
             </section>
 
-            {latestBackgroundTask && (
-              <section className="make-background-task">
-                <div>
-                  <span>
-                    <Clock3 size={16} />
-                    生成中
-                  </span>
-                  <strong>{latestBackgroundTask.title}</strong>
-                  <small>{backgroundTasks.length} 个视频正在生成，创作台可继续使用。</small>
-                </div>
-                <button type="button" className="secondary-action" onClick={() => onOpenTask(latestBackgroundTask.id)}>
-                  <ArrowUpRight size={16} />
-                  查看任务
-                </button>
-                <span className="task-row-progress" aria-label={`${latestBackgroundTask.progress}%`}>
-                  <span style={{ width: `${latestBackgroundTask.progress}%` }}></span>
-                </span>
-              </section>
-            )}
           </section>
         </div>
+
+        {latestBackgroundTask && (
+          <section className="studio-current-task" aria-live="polite">
+            <span className="studio-activity-media">
+              <img src={latestBackgroundTask.image} alt="" />
+              <i><Clock3 size={15} /> 生成中</i>
+            </span>
+            <div className="studio-current-task-copy">
+              <small>
+                {latestBackgroundTask.progress}%
+                {backgroundTasks.length > 1 ? ` · 另有 ${backgroundTasks.length - 1} 个任务` : ''}
+              </small>
+              <strong>{latestBackgroundTask.title}</strong>
+              <span className="studio-activity-progress">
+                <i style={{ width: `${latestBackgroundTask.progress}%` }} />
+              </span>
+            </div>
+            <button type="button" onClick={() => onOpenTask(latestBackgroundTask.id)}>
+              查看进度 <ChevronRight size={15} />
+            </button>
+          </section>
+        )}
       </section>
+      <button
+        type="button"
+        className={duplicateTask ? 'mobile-studio-submit is-processing' : 'mobile-studio-submit'}
+        disabled={!canUseSubmitAction}
+        onClick={handleSubmit}
+      >
+        <SubmitIcon size={19} />
+        <span>{submitLabel}</span>
+        {!duplicateTask && hasSelectedAsset && <em>{totalCost} 积分</em>}
+      </button>
     </div>
   )
 }

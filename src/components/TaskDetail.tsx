@@ -2,26 +2,24 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
-  Coins,
   Download,
   FileVideo,
   Library,
   Play,
   ShieldCheck,
-  TimerReset,
   Zap,
 } from 'lucide-react'
 
+import { activeStatuses } from '../prototypeData'
+import { generatedOutputName } from '../domain'
 import type { Task, TaskStatus } from '../types'
-import { taskCreditState, taskStatusCopy } from '../viewModels'
+import { taskStatusCopy } from '../viewModels'
 
 type TaskDetailProps = {
   task: Task
-  onAdvance: (taskId: string) => void
   onDownload: () => void
   onOpenAssets: () => void
   onPreview: () => void
-  onRefund: (taskId: string) => void
 }
 
 const taskStatusIcon = (status: TaskStatus) => {
@@ -52,7 +50,7 @@ const customerFailureMessage = (task: Task) => {
     return '生成等待时间过长，系统已自动退回积分。你可以稍后重新提交。'
   }
 
-  return '生成服务暂时异常，系统已退回本次冻结积分。你可以稍后重新生成。'
+  return '生成服务暂时异常，本次积分已经退回。你可以稍后重新生成。'
 }
 
 export function TaskDetail({
@@ -65,18 +63,18 @@ export function TaskDetail({
   const StatusIcon = taskStatusIcon(task.status)
   const isSuccess = task.status === 'success'
   const isRefunded = task.status === 'refunded'
-  const creditState = taskCreditState(task)
+  const isActive = activeStatuses.includes(task.status)
   const settingRows = task.params
     ? [
         { label: '画面比例', value: task.params.ratio },
         { label: '视频长度', value: task.params.duration },
-        { label: '清晰度', value: task.params.resolution },
+        { label: '输出分辨率', value: task.params.resolution },
         { label: '画质', value: task.params.quality },
       ]
     : [
         { label: '画面比例', value: '-' },
         { label: '视频长度', value: '-' },
-        { label: '清晰度', value: '-' },
+        { label: '输出分辨率', value: '-' },
         { label: '画质', value: '-' },
       ]
 
@@ -93,9 +91,11 @@ export function TaskDetail({
           <span>{task.cost} 积分 · {task.updated}</span>
         </div>
       </section>
-      <div className="progress-track">
-        <span style={{ width: `${task.progress}%` }}></span>
-      </div>
+      {isActive && (
+        <div className="progress-track">
+          <span style={{ width: `${task.progress}%` }}></span>
+        </div>
+      )}
       {isSuccess && (
         <section className="task-result-panel">
           <button type="button" className="task-result-media" onClick={onPreview}>
@@ -107,22 +107,8 @@ export function TaskDetail({
           </button>
           <div>
             <p className="eyebrow">作品已生成</p>
-            <strong>{task.title}.mp4</strong>
-            <small>{task.cost} 积分已结算 · 资产库已保存 · 30 天保留</small>
-            <div className="task-result-meta">
-              <span>
-                <FileVideo size={15} />
-                MP4 输出
-              </span>
-              <span>
-                <Library size={15} />
-                资产库已保存
-              </span>
-              <span>
-                <TimerReset size={15} />
-                30 天保留
-              </span>
-            </div>
+            <strong>{generatedOutputName(task)}</strong>
+            <small>已使用 {task.cost} 积分 · 保存 30 天</small>
             <div className="result-action-row">
               <button type="button" className="secondary-action" onClick={onDownload}>
                 <Download size={17} />
@@ -130,7 +116,7 @@ export function TaskDetail({
               </button>
               <button type="button" className="secondary-action" onClick={onOpenAssets}>
                 <Library size={17} />
-                去资产库
+                查看素材
               </button>
             </div>
           </div>
@@ -151,37 +137,14 @@ export function TaskDetail({
         <section className="task-recovery-panel">
           <AlertTriangle size={19} />
           <span>
-            <strong>积分已释放</strong>
-            <small>本次失败不会消耗积分。你可以更换图片或调整设置后重新生成。</small>
-            <div className="task-recovery-steps">
-              <em>积分退回</em>
-              <em>设置保留</em>
-              <em>可重新提交</em>
-            </div>
+            <strong>{task.cost} 积分已退回</strong>
+            <small>你可以更换图片或调整设置后重新生成。</small>
           </span>
         </section>
       )}
-      <section className={`task-state-panel ${creditState.className}`}>
-        <span>
-          <Coins size={17} />
-          <strong>{creditState.label}</strong>
-          <small>{creditState.text}</small>
-        </span>
-        <span>
-          <StatusIcon size={17} />
-          <strong>{status.label}</strong>
-          <small>{status.detail}</small>
-        </span>
-        <span>
-          <ShieldCheck size={17} />
-          <strong>记录已保存</strong>
-          <small>生成设置和积分状态会保留在记录中。</small>
-        </span>
-      </section>
       <section className="task-param-panel">
         <header>
           <strong>生成设置</strong>
-          <small>这些设置会随作品记录保存，方便下次复用。</small>
         </header>
         <div className="task-param-grid">
           {settingRows.map((row) => (
@@ -192,18 +155,6 @@ export function TaskDetail({
           ))}
         </div>
       </section>
-      {isSuccess && (
-        <div className="drawer-actions">
-          <button type="button" className="secondary-action" onClick={onPreview}>
-            <Play size={18} />
-            预览结果
-          </button>
-          <button type="button" className="secondary-action" onClick={onDownload}>
-            <Download size={18} />
-            下载结果
-          </button>
-        </div>
-      )}
     </div>
   )
 }

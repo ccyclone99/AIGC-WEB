@@ -18,7 +18,7 @@ This pass should not remove backend-facing data models or future traceability ca
 Implemented in the current frontend pass:
 
 - Browser title changed to `AIGC Studio - 电商视频生成`.
-- Main navigation changed to customer-facing labels: `首页`, `生产台`, `模板`, `作品`, `我的`.
+- Main navigation changed to customer-facing labels: `首页`, `创作`, `模板`, `进度`, `我的`.
 - Prototype/dev English eyebrow labels were removed or rewritten in the visible customer UI.
 - Template detail no longer exposes protocol, version, workflow, pricing version, provider, idempotency, trace, or backend internals.
 - Customer template shelf hides video-input templates until the video creation flow is ready.

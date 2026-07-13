@@ -1,77 +1,47 @@
 import {
-  ArrowRight,
-  CheckCircle2,
-  Coins,
   FileVideo,
-  Gift,
   ImagePlus,
   Library,
-  ShieldCheck,
-  Sparkles,
-  TimerReset,
   WandSparkles,
 } from 'lucide-react'
+import { useEffect } from 'react'
 
+import { trackProductEvent } from '../analytics'
 import { templates } from '../prototypeData'
-import type { AuthMode, ViewId } from '../types'
 
 type HomeViewProps = {
-  onAuth: (mode: AuthMode) => void
-  onNavigate: (view: ViewId) => void
-  onOpenTemplate: (templateId: string) => void
+  onBrowseTemplates: () => void
   onPreview: (title: string, image: string) => void
-  onStartMaking: (templateId: string) => void
+  onStartCreating: () => void
+  onUseTemplate: (templateId: string) => void
 }
 
 export function HomeView({
-  onAuth,
-  onNavigate,
-  onOpenTemplate,
+  onBrowseTemplates,
   onPreview,
-  onStartMaking,
+  onStartCreating,
+  onUseTemplate,
 }: HomeViewProps) {
+  useEffect(() => trackProductEvent('home_opened'), [])
   const primaryTemplate = templates[1]
   const featuredTemplates = [templates[1], templates[0], templates[2], templates[4]]
-  const routeItems: Array<{ title: string; text: string; Icon: typeof Sparkles; view: ViewId }> = [
-    { title: '选模板', text: '按商品场景选择视频方案。', Icon: Sparkles, view: 'templates' },
-    { title: '去生产台', text: '上传图片并后台生成。', Icon: FileVideo, view: 'workbench' },
-    { title: '管资产', text: '管理商品图、输出视频和分类。', Icon: ShieldCheck, view: 'me' },
-  ]
 
   return (
     <div className="page-stack home-page">
       <section className="home-entry-panel">
         <div className="home-entry-copy">
-          <p className="eyebrow">电商视频生成平台</p>
+          <p className="eyebrow">AI 商品视频</p>
           <h1>一张商品图，生成可投放短视频</h1>
-          <p>选择模板、上传主图、提交生成。生成任务会在后台处理，作品完成后自动进入资产库。</p>
+          <p>选择喜欢的风格，上传一张商品图，自动完成镜头、转场和字幕包装。</p>
           <div className="home-entry-actions">
-            <button type="button" className="primary-action" onClick={() => onStartMaking(primaryTemplate.id)}>
+            <button type="button" className="primary-action" onClick={onStartCreating}>
               <ImagePlus size={18} />
-              立即生成视频
+              开始创作
             </button>
-            <button type="button" className="secondary-action" onClick={() => onNavigate('templates')}>
+            <button type="button" className="secondary-action" onClick={onBrowseTemplates}>
               <Library size={18} />
-              浏览模板
+              查看全部模板
             </button>
-            <button type="button" className="secondary-action" onClick={() => onAuth('register')}>
-              <Gift size={18} />
-              领积分
-            </button>
-          </div>
-          <div className="home-kpi-row" aria-label="平台能力">
-            <span>
-              <strong>1 张图</strong>
-              当前核心输入
-            </span>
-            <span>
-              <strong>失败释放</strong>
-              预扣积分更清楚
-            </span>
-            <span>
-              <strong>自动入库</strong>
-              作品可复用管理
-            </span>
           </div>
         </div>
 
@@ -79,69 +49,42 @@ export function HomeView({
           <div className="home-demo-bar">
             <span>
               <FileVideo size={15} />
-              生成示例
+              8 秒商品视频
             </span>
             <em>{primaryTemplate.ratio} · 1080p · {primaryTemplate.duration}</em>
           </div>
           <button type="button" className="home-demo-input" onClick={() => onPreview('输入商品图', primaryTemplate.image)}>
             <img src={primaryTemplate.image} alt="输入商品图" />
             <span>
-              <small>输入素材</small>
-              <strong>商品主图</strong>
-              <em>来自资产库或本地上传</em>
+              <small>第一步</small>
+              <strong>上传商品图</strong>
+              <em>支持 JPG、PNG</em>
             </span>
           </button>
           <span className="home-demo-flow">
             <WandSparkles size={18} />
-            自动生成视频
+            选择风格，一键生成
           </span>
-          <button type="button" className="home-demo-output" onClick={() => onOpenTemplate(primaryTemplate.id)}>
+          <button type="button" className="home-demo-output" onClick={() => onUseTemplate(primaryTemplate.id)}>
             <img src={primaryTemplate.image} alt="生成后的电商短视频预览" />
             <span>
-              <small>输出结果</small>
+              <small>生成效果</small>
               <strong>{primaryTemplate.title}</strong>
-              <em>{primaryTemplate.cost} 积分 · 生成后入库</em>
+              <em>{primaryTemplate.cost} 积分 · 自动保存</em>
             </span>
           </button>
-          <div className="home-demo-status">
-            <span>
-              <CheckCircle2 size={15} />
-              校验通过
-            </span>
-            <span>
-              <TimerReset size={15} />
-              进入队列
-            </span>
-            <span>
-              <Coins size={15} />
-              预扣冻结
-            </span>
-          </div>
         </div>
-      </section>
-
-      <section className="home-route-strip" aria-label="主要流程">
-        {routeItems.map(({ title, text, Icon, view }) => (
-          <button type="button" key={title} onClick={() => onNavigate(view)}>
-            <Icon size={19} />
-            <span>
-              <strong>{title}</strong>
-              <small>{text}</small>
-            </span>
-            <ArrowRight size={17} />
-          </button>
-        ))}
       </section>
 
       <section className="home-template-rack">
         <div className="section-heading">
           <p className="eyebrow">热门模板</p>
-          <h2>优先开放的模板场景</h2>
-          <span>选择常用场景，上传商品图即可开始。</span>
+          <h2>选择一个成片风格</h2>
+          <span>上传商品图即可开始，默认参数已经配好。</span>
         </div>
         <div className="home-template-grid">
           {featuredTemplates.map((template) => (
-            <button type="button" key={template.id} className="home-template-card" onClick={() => onOpenTemplate(template.id)}>
+            <button type="button" key={template.id} className="home-template-card" onClick={() => onUseTemplate(template.id)}>
               <img src={template.image} alt={template.title} />
               <span>
                 <small>{template.category}</small>

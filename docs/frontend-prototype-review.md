@@ -26,7 +26,7 @@ Local URL:
 
 The previous prototype included a fuller product shell with these modules:
 
-- `生产台`: logged-in production hub for starting video creation, monitoring background tasks, and reusing recent assets.
+- `创作`: logged-in creation hub for starting video creation, monitoring background work, and reusing recent materials.
 - `模板广场`: searchable/filterable template gallery with ecommerce-first categories.
 - `创作`: generation workspace with uploads, simple inputs, platform preset, style selection, advanced options, credit pre-freeze, and traceability cues.
 - `任务`: task center with running, success, and refunded states plus a traceability panel.
@@ -93,9 +93,9 @@ These are frontend-only demo states. Backend integration later needs to replace 
 Current user-facing navigation is:
 
 - `首页`
-- `生产台`
+- `创作`
 - `模板`
-- `任务`
+- `进度`
 - `我的`
 
 The previous standalone `创作`, `资产库`, and `积分` sections are accessed through context:
@@ -246,7 +246,7 @@ This avoids forcing one motion style onto every page.
 
 For the complete app structure:
 
-- Keep `首页`, `生产台`, `模板`, `任务`, and `我的` as the main user navigation for MVP prototype review.
+- Keep `首页`, `创作`, `模板`, `进度`, and `我的` as the main user navigation for MVP prototype review. The internal route can remain `tasks`.
 - Keep `首页` as the public product homepage.
 - Use `生产台` as the logged-in production center, not the public homepage.
 - Keep modal/drawer/sheet surfaces for preview, credit, task detail, auth, and filters; use the production desk creation state for production editing.

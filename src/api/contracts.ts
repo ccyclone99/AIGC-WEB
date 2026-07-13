@@ -198,7 +198,10 @@ export type LedgerRowDto = {
 
 export type PaymentOrderDto = {
   id: string
+  packageId: string
   packageName: string
+  amountMinor: number
+  currency: 'CNY'
   amount: string
   credits: number
   status: PaymentOrderStatus
@@ -209,7 +212,7 @@ export type PaymentOrderDto = {
 }
 
 export type CreatePaymentOrderRequest = {
-  packageName: string
+  packageId: string
   channel: string
   idempotencyKey: string
 }

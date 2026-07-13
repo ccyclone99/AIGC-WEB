@@ -11,9 +11,9 @@ type UploadReceiptPanelProps = {
 const uploadReceiptStatusLabel = (status: UploadReceiptStatus) => {
   const statusMap: Record<UploadReceiptStatus, string> = {
     idle: '等待上传',
-    validating: '校验中',
-    uploading: '入库中',
-    saved: '已入库',
+    validating: '正在检查',
+    uploading: '正在上传',
+    saved: '上传完成',
     failed: '上传失败',
     cancelled: '已取消',
     rejected: '请重新上传',
@@ -23,6 +23,8 @@ const uploadReceiptStatusLabel = (status: UploadReceiptStatus) => {
 }
 
 export function UploadReceiptPanel({ receipt, onCancel, onRetry }: UploadReceiptPanelProps) {
+  if (receipt.status === 'idle') return null
+
   const canCancel = receipt.status === 'validating' || receipt.status === 'uploading'
   const canRetry = receipt.status === 'failed' || receipt.status === 'cancelled' || receipt.status === 'rejected'
 

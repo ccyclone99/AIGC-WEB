@@ -1,7 +1,7 @@
 # AIGC Web SPEC
 
 Status: Draft, frontend prototype baseline updated
-Last updated: 2026-06-29
+Last updated: 2026-07-10
 
 ## 1. Overview
 
@@ -18,11 +18,13 @@ Primary MVP template categories:
 
 Current user-facing website navigation:
 
-- `首页`: public website homepage for product positioning, primary use cases, registration bonus entry, template browsing, and entry into the logged-in workspace.
-- `生产台`: logged-in production center for starting videos, monitoring background tasks, checking credit state, and reusing recent assets. The code route can still use `workbench`; the visible product label is `生产台`.
-- `模板`: template discovery, search, filtering, preview, and entry into template-based creation.
-- `任务`: task list, progress, completion/failure/refund status, and task traceability.
-- `我的`: account-adjacent space split into `资产`, `积分`, and `账号` tabs for asset management, credit recharge/ledger, login/register, and personal records.
+- `首页`: public product and conversion surface with its own persistent primary-navigation item; the Logo also returns here.
+- `创作`: a template-first flow. Users preview and select a template before entering asset input and submission.
+- `作品`: the library for complete generation history, generated outputs, and reusable user uploads.
+- Active tasks use an in-workspace status area and a conditional global task entry instead of a permanent `进度` page.
+- Credits and account actions use the existing top-bar entries and overlays instead of a permanent `我的` page.
+
+The approved navigation and interaction baseline is defined in [template-first-creation-experience-spec.md](./template-first-creation-experience-spec.md). It supersedes the earlier two-entry navigation and direct-to-editor creation decisions.
 
 The homepage and production desk are separate surfaces. The homepage is the public product entry. The production desk is the logged-in production center. Template details can still open in a modal for preview, but serious creation should move into the production desk's creation state, not stay trapped inside a modal.
 
@@ -167,9 +169,10 @@ Frontend quality is mandatory. Motion/card interactions should be explored throu
 
 Frontend complexity should be reduced through lightweight pages plus overlays:
 
-- Template cards open a template detail modal.
-- Template use routes into the production desk creation state, not a cramped drawer or modal.
-- `创作台` defaults to image-only generation. Advanced settings are output parameters such as ratio, video length, image resolution, and clarity; they are not template switching, style writing, or required prompt fields.
+- `创作` opens with a 9:16 template-preview feed; the user explicitly chooses a template before entering the editor.
+- `全部模板` is a dedicated secondary page with categories and optional search, not a primary-navigation item.
+- Template use routes into the production editor state, not a cramped drawer or modal.
+- Ordinary templates hide advanced settings and use recommended output values. Only fields explicitly enabled by a template are user-editable.
 - Template configuration must follow the frontend-approved contract for inputs, output settings, capabilities, pricing version, settlement, and trace fields.
 - Task detail opens a task drawer.
 - Filters use popovers or bottom sheets.
@@ -192,11 +195,11 @@ See:
 User-facing:
 
 - Home page.
-- Template gallery.
+- Template-first creation discovery plus a dedicated all-templates page.
 - Creation workspace for two template categories.
 - Login-gated submit.
 - Credit balance.
-- Task center / generation history.
+- Works library containing generation history and reusable uploads, with active task status available inside creation.
 - Asset upload and user-managed asset library.
 - Completed video preview.
 - Signed download.
@@ -236,11 +239,9 @@ The prototype has started separating backend-facing concepts from page markup:
 - `src/hooks/usePrototypeStore.ts`: local prototype state boundary that can later be replaced by API-backed slices.
 - `src/api/*`: frontend API contract placeholders and mapping boundary for backend integration.
 - `src/components/HomeView.tsx`: public product entry.
-- `src/components/WorkbenchView.tsx`: visible `生产台`, the logged-in production hub.
-- `src/components/StudioPage.tsx`: image-only creation surface with background task behavior.
-- `src/components/TemplatesView.tsx`: template discovery and detail surfaces.
-- `src/components/TasksView.tsx`: task monitor and traceable task list.
-- `src/components/MeView.tsx`: resource/account center shell.
+- `src/components/StudioPage.tsx`: unified creation surface with template switching, generation controls, active task status, and recent results.
+- `src/components/TemplatePicker.tsx`: in-workspace template discovery and compatibility confirmation.
+- `src/components/WorksView.tsx`: generated works, task states, recovery actions, and reusable upload management.
 - `src/components/AuthPanel.tsx`: QR login, third-party login entry, signup reward, and signup risk checks.
 - `src/components/AssetPicker.tsx`: creation asset selection, category filtering, upload entry, and preview-only asset states.
 - `src/components/AssetManager.tsx`: user-managed asset library.

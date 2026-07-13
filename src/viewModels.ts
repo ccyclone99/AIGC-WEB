@@ -10,38 +10,54 @@ import type {
   TaskStatus,
 } from './types'
 
+export type WorkTaskFilter = 'recent' | 'active' | 'success' | 'refunded'
+
+export const filterTasksForWorks = (tasks: Task[], filter: WorkTaskFilter) =>
+  tasks.filter((task) => {
+    if (filter === 'recent') return activeStatuses.includes(task.status) || task.status === 'success'
+    if (filter === 'active') return activeStatuses.includes(task.status)
+    return task.status === filter
+  })
+
+export const worksTaskCounts = (tasks: Task[]) => {
+  const active = tasks.filter((task) => activeStatuses.includes(task.status)).length
+  const success = tasks.filter((task) => task.status === 'success').length
+  const refunded = tasks.filter((task) => task.status === 'refunded').length
+  return { active, success, refunded, recent: active + success }
+}
+
 export const taskCreditState = (task: Task) => {
   if (activeStatuses.includes(task.status)) {
     return {
-      label: '冻结中',
-      text: `${task.cost} 积分冻结，失败/超时自动释放`,
+      label: '生成中',
+      text: `已预留 ${task.cost} 积分，未完成会自动退回`,
       className: 'is-frozen',
     }
   }
 
   if (task.status === 'success') {
     return {
-      label: '已结算',
-      text: `${task.cost} 积分已结算，结果已入库`,
+      label: '已完成',
+      text: `已使用 ${task.cost} 积分，作品已保存`,
       className: 'is-settled',
     }
   }
 
   return {
-    label: '积分释放',
-    text: `${task.cost} 积分已释放，可重新提交`,
+    label: '已退回',
+    text: `${task.cost} 积分已退回`,
     className: 'is-released',
   }
 }
 
 export const taskStatusCopy = (status: TaskStatus) => {
   const statusMap: Record<TaskStatus, { label: string; detail: string }> = {
-    queued: { label: '排队中', detail: '视频已进入生成队列，请稍候。' },
+    queued: { label: '等待生成', detail: '视频已进入生成队列，请稍候。' },
     running: { label: '生成中', detail: '生成模型正在处理主视觉和关键帧。' },
-    rendering: { label: '合成中', detail: '正在合成字幕、转场、比例和封面。' },
-    review: { label: '保存中', detail: '正在完成作品保存和入库。' },
-    success: { label: '已完成', detail: '输出已生成，资产可预览、下载或复用。' },
-    refunded: { label: '失败已释放', detail: '任务失败或被阻断，冻结积分已释放。' },
+    rendering: { label: '处理成片', detail: '正在处理字幕、转场、比例和封面。' },
+    review: { label: '保存作品', detail: '视频即将完成，正在保存到作品库。' },
+    success: { label: '已完成', detail: '视频已生成，可以预览或下载。' },
+    refunded: { label: '需处理', detail: '本次未生成成功，积分已经退回。' },
   }
 
   return statusMap[status]
@@ -49,7 +65,7 @@ export const taskStatusCopy = (status: TaskStatus) => {
 
 export const failureStageLabel = (stage: TaskFailureStage) => {
   const stageMap: Record<TaskFailureStage, string> = {
-    input: '输入校验',
+    input: '图片检查',
     provider: '生成服务',
     render: '视频合成',
     moderation: '内容确认',
@@ -61,7 +77,7 @@ export const failureStageLabel = (stage: TaskFailureStage) => {
 export const failureReasonLabel = (reason: TaskFailureReason) => {
   const reasonMap: Record<TaskFailureReason, string> = {
     provider_error: '生成服务异常',
-    timeout: '任务超时',
+    timeout: '生成超时',
     moderation_block: '内容需确认',
     asset_invalid: '素材无效',
   }
@@ -140,14 +156,14 @@ export const riskStatusLabel = (status: RiskCheckStatus) => {
 
 export const assetFilterEmptyText = (filter: AssetFilter) => {
   const emptyText: Record<string, string> = {
-    全部: '资产库还没有可用素材，可以先上传商品图。',
+    全部: '还没有可用素材，可以先上传商品图。',
     商品主图: '还没有商品主图，可以上传一张用于生成视频。',
     人像素材: '还没有人像素材，后续写真/变装模板会优先使用这里。',
-    生成视频: '还没有生成视频，完成任务后会自动进入这里。',
-    Logo: '还没有 Logo 素材，后续品牌模板会使用这里。',
-    即将过期: '当前没有即将过期的资产。',
-    已归档: '还没有归档资产。',
+    生成视频: '还没有生成视频，完成后会自动显示在这里。',
+    品牌标识: '还没有品牌标识，后续品牌模板会使用这里。',
+    即将过期: '当前没有即将过期的素材。',
+    已归档: '还没有归档素材。',
   }
 
-  return emptyText[filter] ?? `「${filter}」分类下还没有素材，可以上传或把已有资产移入该分类。`
+  return emptyText[filter] ?? `「${filter}」分类下还没有素材。`
 }

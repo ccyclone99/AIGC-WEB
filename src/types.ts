@@ -1,6 +1,18 @@
-export type ViewId = 'home' | 'workbench' | 'templates' | 'tasks' | 'me'
-export type WorkbenchMode = 'overview' | 'create'
-export type OverlayType = 'template' | 'task' | 'credits' | 'filters' | 'lightbox' | 'auth' | 'assetPicker' | null
+export type ViewId = 'home' | 'workbench' | 'templates' | 'works'
+export type CreationStage = 'choose' | 'edit'
+export type WorksSection = 'generations' | 'assets'
+export type AccountSection = 'profile' | 'security' | 'notifications' | 'help'
+export type OverlayType =
+  | 'template'
+  | 'templatePicker'
+  | 'task'
+  | 'credits'
+  | 'account'
+  | 'filters'
+  | 'lightbox'
+  | 'auth'
+  | 'assetPicker'
+  | null
 export type TaskStatus = 'queued' | 'running' | 'rendering' | 'review' | 'success' | 'refunded'
 export type AuthMode = 'login' | 'register'
 export type OutputSettingKey = 'ratio' | 'duration' | 'resolution' | 'quality'
@@ -44,6 +56,7 @@ export type TemplateConfig = {
   settlement: 'freeze_then_settle'
   inputFields: TemplateInputField[]
   outputFields: OutputSettingKey[]
+  userEditableOutputFields?: OutputSettingKey[]
   capabilities: TemplateCapability[]
   traceFields: string[]
 }
@@ -111,6 +124,16 @@ export type Asset = {
   source: string
 }
 
+export type SessionState = {
+  authenticated: boolean
+  user?: {
+    id: string
+    displayName: string
+    avatarUrl?: string
+    phoneMasked?: string
+  }
+}
+
 export type LedgerRow = {
   id: string
   title: string
@@ -137,7 +160,10 @@ export type PreviewMedia = {
 
 export type PaymentOrder = {
   id: string
+  packageId: string
   packageName: string
+  amountMinor: number
+  currency: 'CNY'
   amount: string
   credits: number
   status: PaymentOrderStatus
@@ -173,7 +199,10 @@ export type QrLoginSession = {
 }
 
 export type RechargePackage = {
+  id: string
   name: string
+  amountMinor: number
+  currency: 'CNY'
   price: string
   credits: number
   bonus: string

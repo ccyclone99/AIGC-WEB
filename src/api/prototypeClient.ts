@@ -103,7 +103,7 @@ export function createPrototypeAigcApiClient(): AigcApiClient {
           status: 'validating',
           progress: 18,
           source: request.source,
-          message: '正在校验文件格式、大小和资产入库参数。',
+          message: '正在检查图片格式和大小。',
           uploadUrl: `/prototype-upload/${request.idempotencyKey}`,
         }),
       completeUpload: async (uploadId) =>
@@ -113,7 +113,7 @@ export function createPrototypeAigcApiClient(): AigcApiClient {
           status: 'saved',
           progress: 100,
           assetId: initialAssets[0].id,
-          message: '图片已保存为资产，可直接用于生成任务。',
+          message: '图片已上传，可以开始创作。',
         }),
       cancelUpload: async (uploadId) =>
         ok<UploadReceiptDto>({
@@ -121,18 +121,18 @@ export function createPrototypeAigcApiClient(): AigcApiClient {
           id: uploadId,
           status: 'cancelled',
           progress: 0,
-          message: '上传流程已取消，未创建新的资产记录。',
+          message: '上传已取消。',
         }),
       update: async (assetId, request) => {
         const asset = initialAssets.find((item) => item.id === assetId)
-        return asset ? ok<AssetDto>(toAssetDto({ ...asset, ...request })) : notFound('资产不存在')
+        return asset ? ok<AssetDto>(toAssetDto({ ...asset, ...request })) : notFound('素材不存在')
       },
       archive: async (assetId) => updateAssetStatus(assetId, 'archived'),
       restore: async (assetId) => updateAssetStatus(assetId, 'library'),
       createDownloadUrl: async (assetId) =>
         initialAssets.some((asset) => asset.id === assetId)
           ? ok({ url: `/prototype-download/${assetId}`, expiresAt: minutesFromNow(15) })
-          : notFound('资产不存在'),
+          : notFound('素材不存在'),
     },
     generationTasks: {
       create: async (request: CreateGenerationTaskRequest) =>
@@ -171,12 +171,15 @@ export function createPrototypeAigcApiClient(): AigcApiClient {
     },
     payments: {
       createOrder: async (request: CreatePaymentOrderRequest) => {
-        const pack = rechargePackages.find((item) => item.name === request.packageName) ?? rechargePackages[0]
+        const pack = rechargePackages.find((item) => item.id === request.packageId) ?? rechargePackages[0]
         return ok<PaymentOrderDto>(
           toPaymentOrderDto({
             ...initialPaymentOrder,
             id: `PAY-${Date.now()}`,
+            packageId: pack.id,
             packageName: pack.name,
+            amountMinor: pack.amountMinor,
+            currency: pack.currency,
             amount: pack.price,
             credits: pack.credits,
             channel: request.channel,
@@ -253,7 +256,7 @@ function toTaskDto(task: Task): GenerationTaskDto {
     status: task.status,
     progress: task.progress,
     cost: task.cost,
-    updatedAt: nowIso(),
+    updatedAt: relativeLabelToIso(task.updated),
     image: task.image,
     videoSrc: task.videoSrc,
     params: {
@@ -283,7 +286,7 @@ function toLedgerDto(row: LedgerRow): LedgerRowDto {
     kind: row.kind,
     status: row.status,
     refId: row.refId,
-    createdAt: nowIso(),
+    createdAt: relativeLabelToIso(row.time),
     note: row.note,
     idempotencyKey: `ledger:${row.id}`,
   }
@@ -292,7 +295,10 @@ function toLedgerDto(row: LedgerRow): LedgerRowDto {
 function toPaymentOrderDto(order: PaymentOrder): PaymentOrderDto {
   return {
     id: order.id,
+    packageId: order.packageId,
     packageName: order.packageName,
+    amountMinor: order.amountMinor,
+    currency: order.currency,
     amount: order.amount,
     credits: order.credits,
     status: order.status,
@@ -301,6 +307,19 @@ function toPaymentOrderDto(order: PaymentOrder): PaymentOrderDto {
     expiresAt: minutesFromNow(15),
     note: order.note,
   }
+}
+
+function relativeLabelToIso(label: string) {
+  const date = new Date()
+  const amount = Number.parseInt(label, 10)
+
+  if (label.includes('分钟') && Number.isFinite(amount)) date.setMinutes(date.getMinutes() - amount)
+  else if (label.includes('小时') && Number.isFinite(amount)) date.setHours(date.getHours() - amount)
+  else if (label.includes('天') && Number.isFinite(amount)) date.setDate(date.getDate() - amount)
+  else if (label.includes('昨天')) date.setDate(date.getDate() - 1)
+  else if (label.includes('今天')) date.setHours(date.getHours() - 2)
+
+  return date.toISOString()
 }
 
 function assetCategories(): AssetCategoryDto[] {
@@ -332,7 +351,7 @@ function signupCampaign(): RewardCampaignDto {
 
 function updateAssetStatus(assetId: string, status: Asset['status']) {
   const asset = initialAssets.find((item) => item.id === assetId)
-  return asset ? ok<AssetDto>(toAssetDto({ ...asset, status })) : notFound<AssetDto>('资产不存在')
+  return asset ? ok<AssetDto>(toAssetDto({ ...asset, status })) : notFound<AssetDto>('素材不存在')
 }
 
 function taskAction(taskId: string, status: Task['status']) {

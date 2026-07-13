@@ -97,7 +97,10 @@ export function mapLedgerRowDto(dto: LedgerRowDto): LedgerRow {
 export function mapPaymentOrderDto(dto: PaymentOrderDto): PaymentOrder {
   return {
     id: dto.id,
+    packageId: dto.packageId,
     packageName: dto.packageName,
+    amountMinor: dto.amountMinor,
+    currency: dto.currency,
     amount: dto.amount,
     credits: dto.credits,
     status: dto.status,

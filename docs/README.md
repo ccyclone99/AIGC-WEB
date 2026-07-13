@@ -5,6 +5,7 @@ This directory contains the current product, architecture, and implementation pl
 ## Start Here
 
 - [SPEC.md](./SPEC.md): consolidated product and technical specification.
+- [template-first-creation-experience-spec.md](./template-first-creation-experience-spec.md): current implementation-ready user navigation and creation-flow specification.
 - [mvp-boundary-and-backlog.md](./mvp-boundary-and-backlog.md): MVP scope and implementation sequence.
 - [requirements-notes.md](./requirements-notes.md): full discussion notes and evolving decisions.
 - [spec-readiness-review.md](./spec-readiness-review.md): readiness assessment and remaining gaps.
@@ -12,6 +13,8 @@ This directory contains the current product, architecture, and implementation pl
 
 ## Product and UX
 
+- [template-first-creation-experience-spec.md](./template-first-creation-experience-spec.md): current authoritative navigation, template-first creation, vertical preview carousel, all-templates page, advanced-setting visibility, and account-menu specification.
+- [unified-creation-workspace-spec.md](./unified-creation-workspace-spec.md): previous two-entry baseline; retained for task/works migration context and partially superseded by the template-first SPEC.
 - [frontend-ux-direction.md](./frontend-ux-direction.md): user-facing website and page structure.
 - [frontend-polish-spec.md](./frontend-polish-spec.md): next frontend-only visual, interaction, and responsive polish pass.
 - [customer-demo-cleanup-spec.md](./customer-demo-cleanup-spec.md): customer-facing cleanup rules before sharing the online demo.
@@ -65,8 +68,8 @@ This directory contains the current product, architecture, and implementation pl
 
 ## Recommended First Build Path
 
-1. Use [frontend-premium-ux-redesign-spec.md](./frontend-premium-ux-redesign-spec.md) as the current frontend page-role and polish baseline.
-2. Continue refining homepage, production desk, template gallery, creation studio, task tracking, and asset/account management against the current prototype.
+1. Use [template-first-creation-experience-spec.md](./template-first-creation-experience-spec.md) as the current user-facing information architecture and interaction baseline.
+2. Keep `首页 / 创作 / 作品` visible, make template discovery the first creation stage, and consolidate generation history and reusable uploads into `作品`.
 3. Re-run desktop/mobile prototype review after each substantial frontend pass.
 4. Keep frontend state boundaries stable around templates, assets, tasks, credits, auth, and overlays.
 5. Use [backend-interface-prep.md](./backend-interface-prep.md), [backend-api-contract.md](./backend-api-contract.md), [backend-readiness-audit.md](./backend-readiness-audit.md), and [backend-integration-sequence.md](./backend-integration-sequence.md) as the gate before adding backend foundation.

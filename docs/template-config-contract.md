@@ -24,10 +24,13 @@ type TemplateConfig = {
   settlement: 'freeze_then_settle'
   inputFields: TemplateInputField[]
   outputFields: Array<'ratio' | 'duration' | 'resolution' | 'quality'>
+  userEditableOutputFields?: Array<'ratio' | 'duration' | 'resolution' | 'quality'>
   capabilities: TemplateCapability[]
   traceFields: string[]
 }
 ```
+
+`outputFields` records the complete output settings supported and snapshotted by the task. `userEditableOutputFields` controls which of those fields are visible in the user editor and defaults to an empty array. Ordinary templates therefore use recommended values without showing a generic advanced-settings panel.
 
 ## Input Field Shape
 

@@ -1,26 +1,30 @@
-import { CheckCircle2, Images, Play, Upload } from 'lucide-react'
+import { CheckCircle2, Images, Upload } from 'lucide-react'
 import { useState, type ChangeEvent } from 'react'
 
-import { canUseAssetForGeneration, filterAssetByCategory } from '../domain'
-import type { Asset, AssetFilter, PreviewMedia, UploadReceipt } from '../types'
+import { filterAssetByCategory } from '../domain'
+import type { Asset, AssetFilter, AssetKind, PreviewMedia, UploadReceipt } from '../types'
 import { assetFilterEmptyText } from '../viewModels'
 import { UploadReceiptPanel } from './UploadReceiptPanel'
 
 type AssetPickerProps = {
   assets: Asset[]
+  acceptedKinds: AssetKind[]
   assetFilters: AssetFilter[]
+  inputLabel: string
   selectedAssetId: string
   uploadReceipt: UploadReceipt
   onCancelUpload: () => void
   onPreview: (title: string, image: string, media?: Partial<Pick<PreviewMedia, 'kind' | 'videoSrc'>>) => void
   onRetryUpload: () => void
   onSelect: (assetId: string) => void
-  onUpload: (file: File) => void
+  onUpload: (file: File, kind: AssetKind) => void
 }
 
 export function AssetPicker({
   assets,
+  acceptedKinds,
   assetFilters,
+  inputLabel,
   selectedAssetId,
   uploadReceipt,
   onCancelUpload,
@@ -30,18 +34,20 @@ export function AssetPicker({
   onUpload,
 }: AssetPickerProps) {
   const [assetFilter, setAssetFilter] = useState<AssetFilter>('全部')
-  const selectedAsset = selectedAssetId ? assets.find((asset) => asset.id === selectedAssetId) : undefined
-  const usableAssetCount = assets.filter(canUseAssetForGeneration).length
-  const previewOnlyCount = assets.filter((asset) => asset.status === 'library' && !canUseAssetForGeneration(asset)).length
-  const getFilterCount = (filter: AssetFilter) => assets.filter((asset) => filterAssetByCategory(asset, filter)).length
+  const canUseAsset = (asset: Asset) => asset.status === 'library' && acceptedKinds.includes(asset.kind)
+  const usableAssetCount = assets.filter(canUseAsset).length
+  const getFilterCount = (filter: AssetFilter) =>
+    assets.filter((asset) => canUseAsset(asset) && filterAssetByCategory(asset, filter)).length
   const visibleAssetFilters = assetFilters.filter((filter) => filter === '全部' || getFilterCount(filter) > 0)
   const visibleAssets = assets
+    .filter(canUseAsset)
     .filter((asset) => filterAssetByCategory(asset, assetFilter))
-    .sort((a, b) => Number(canUseAssetForGeneration(b)) - Number(canUseAssetForGeneration(a)))
+  const uploadKind = acceptedKinds[0] ?? 'image'
+  const acceptsVideo = acceptedKinds.includes('video')
 
   const handlePickerUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0]
-    if (file) onUpload(file)
+    if (file) onUpload(file, uploadKind)
     event.currentTarget.value = ''
   }
 
@@ -49,35 +55,17 @@ export function AssetPicker({
     <div className="asset-picker">
       <header className="asset-picker-head">
         <div>
-          <p className="eyebrow">资产库</p>
-          <strong>先从资产库选图，也可以直接上传新图片。</strong>
+          <p className="eyebrow">选择{inputLabel}</p>
+          <strong>从已有素材中选择，或上传一份新素材。</strong>
         </div>
-        <span>{usableAssetCount} 个图片素材可用于当前模板</span>
+        <span>{usableAssetCount} 份可用素材</span>
       </header>
-
-      <section className="asset-picker-status-strip">
-        <span className="asset-picker-current-state">
-          <CheckCircle2 size={17} />
-          <strong>当前</strong>
-          <em>{selectedAsset?.name ?? '未选择图片'}</em>
-        </span>
-        <span className="asset-picker-count-state">
-          <Images size={17} />
-          <strong>可生成</strong>
-          <em>{usableAssetCount} 个图片</em>
-        </span>
-        <span className="asset-picker-count-state">
-          <Play size={17} />
-          <strong>仅预览</strong>
-          <em>{previewOnlyCount} 个素材</em>
-        </span>
-      </section>
 
       {uploadReceipt.status !== 'idle' && (
         <UploadReceiptPanel receipt={uploadReceipt} onCancel={onCancelUpload} onRetry={onRetryUpload} />
       )}
 
-      <div className="asset-picker-filters" aria-label="资产分类">
+      <div className="asset-picker-filters" aria-label="素材分类">
         {visibleAssetFilters.map((filter) => (
           <button
             type="button"
@@ -96,17 +84,16 @@ export function AssetPicker({
           className="file-input"
           id="asset-picker-upload"
           type="file"
-          accept="image/*"
+          accept={acceptsVideo ? 'video/*' : 'image/*'}
           onChange={handlePickerUpload}
         />
         <label className="asset-picker-upload" htmlFor="asset-picker-upload">
           <Upload size={28} />
-          <strong>上传图片</strong>
-          <span>PNG / JPG / WebP，自动加入资产库</span>
+          <strong>上传{inputLabel}</strong>
+          <span>{acceptsVideo ? 'MP4 / MOV' : 'PNG / JPG / WebP'}，上传后自动保存</span>
         </label>
 
         {visibleAssets.map((asset) => {
-          const canSelect = canUseAssetForGeneration(asset)
           const isSelected = selectedAssetId === asset.id
 
           return (
@@ -114,7 +101,6 @@ export function AssetPicker({
               className={[
                 'asset-picker-card',
                 isSelected ? 'is-selected' : '',
-                canSelect ? '' : 'is-disabled',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -127,7 +113,7 @@ export function AssetPicker({
                   onPreview(
                     asset.name,
                     asset.image,
-                    asset.kind === 'video' ? { kind: 'video', videoSrc: asset.videoSrc } : undefined,
+                    undefined,
                   )
                 }
               >
@@ -136,11 +122,6 @@ export function AssetPicker({
                 {isSelected && (
                   <i className="asset-picker-selected-mark">
                     <CheckCircle2 size={14} />
-                  </i>
-                )}
-                {asset.kind === 'video' && (
-                  <i className="asset-picker-play-mark">
-                    <Play size={14} fill="currentColor" />
                   </i>
                 )}
               </button>
@@ -152,8 +133,8 @@ export function AssetPicker({
               </div>
               <div className="asset-picker-actions">
                 <em>{asset.kind === 'video' ? '视频素材' : '图片素材'}</em>
-                <button type="button" disabled={!canSelect || isSelected} onClick={() => onSelect(asset.id)}>
-                  {isSelected ? '当前使用' : canSelect ? '选择图片' : '不适用当前模板'}
+                <button type="button" disabled={isSelected} onClick={() => onSelect(asset.id)}>
+                  {isSelected ? '当前使用' : `选择${inputLabel}`}
                 </button>
               </div>
             </article>
@@ -165,7 +146,7 @@ export function AssetPicker({
         <section className="asset-picker-empty">
           <Images size={22} />
           <strong>{assetFilterEmptyText(assetFilter)}</strong>
-          <span>可以使用左上角上传入口补充新素材。</span>
+          <span>可以先上传一份符合模板要求的素材。</span>
         </section>
       )}
     </div>
