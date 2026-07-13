@@ -97,6 +97,8 @@ function App() {
           onSectionChange={store.setWorksSection}
           onOpenTask={store.openTask}
           onDownloadTask={store.downloadTaskResult}
+          onDeleteTask={store.deleteTask}
+          onRenameTask={store.renameTask}
           onReuseTask={store.reuseTask}
           onArchiveAsset={store.archiveAsset}
           onCancelUpload={store.cancelUpload}

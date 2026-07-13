@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { aigcApiClient, aigcApiConfig } from '../api/config'
 import { trackProductEvent } from '../analytics'
@@ -35,6 +35,24 @@ import {
   templates,
   videoPreviewSrc,
 } from '../prototypeData'
+import {
+  claimIdOnce,
+  completeTaskState,
+  creditedPaymentIdsFromLedger,
+  deleteCompletedTaskState,
+  generatedAssetForTask,
+  paymentRechargeLedgerRow,
+  refundTaskState,
+  renameCompletedTaskState,
+  resolvedTaskIdsFromLedger,
+  taskReleaseLedgerRow,
+  taskSettlementLedgerRow,
+} from '../stateTransitions'
+import {
+  parseStoredStudioDraft,
+  serializeStudioDraft,
+  studioDraftStorageKey,
+} from '../studioDraft'
 import { qrLoginStatusCopy } from '../viewModels'
 import type {
   AccountSection,
@@ -63,25 +81,9 @@ import type {
   WorksSection,
 } from '../types'
 
-const studioDraftKey = 'aigc-studio-draft-v1'
-
-type StoredStudioDraft = {
-  templateId?: string
-  assetId?: string
-  outputSettings?: OutputSettings
-}
-
-const readStoredStudioDraft = (): StoredStudioDraft => {
-  try {
-    return JSON.parse(window.localStorage.getItem(studioDraftKey) ?? '{}') as StoredStudioDraft
-  } catch {
-    return {}
-  }
-}
-
 export function usePrototypeStore() {
   const initialRoute = routeIntentFromHash(window.location.hash)
-  const [initialDraft] = useState(readStoredStudioDraft)
+  const [initialDraft] = useState(() => parseStoredStudioDraft(window.localStorage.getItem(studioDraftStorageKey)))
   const hasValidInitialRouteTemplate = Boolean(
     initialRoute.templateId && templates.some((template) => template.id === initialRoute.templateId),
   )
@@ -104,7 +106,9 @@ export function usePrototypeStore() {
       ? initialDraft.outputSettings
       : outputDefaultsForTemplate(templates.find((template) => template.id === initialTemplateId) ?? templates[0]),
   )
-  const [selectedStudioAssetId, setSelectedStudioAssetId] = useState(initialDraft.assetId ?? '')
+  const [selectedStudioAssetId, setSelectedStudioAssetId] = useState(
+    initialDraft.assetId && initialAssets.some((asset) => asset.id === initialDraft.assetId) ? initialDraft.assetId : '',
+  )
   const [selectedFilters, setSelectedFilters] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [authMode, setAuthMode] = useState<AuthMode>('login')
@@ -128,6 +132,8 @@ export function usePrototypeStore() {
     image: templates[0].image,
     kind: 'image',
   })
+  const resolvedTaskIdsRef = useRef(resolvedTaskIdsFromLedger(initialLedgerRows))
+  const creditedPaymentIdsRef = useRef(creditedPaymentIdsFromLedger(initialLedgerRows))
 
   useEffect(() => {
     if (!toast) return
@@ -136,12 +142,20 @@ export function usePrototypeStore() {
   }, [toast])
 
   useEffect(() => {
-    window.localStorage.setItem(studioDraftKey, JSON.stringify({
-      templateId: studioTemplateId,
-      assetId: selectedStudioAssetId,
-      outputSettings,
-    } satisfies StoredStudioDraft))
+    window.localStorage.setItem(
+      studioDraftStorageKey,
+      serializeStudioDraft({
+        templateId: studioTemplateId,
+        assetId: selectedStudioAssetId,
+        outputSettings,
+      }),
+    )
   }, [outputSettings, selectedStudioAssetId, studioTemplateId])
+
+  useEffect(() => {
+    resolvedTaskIdsFromLedger(demoLedgerRows).forEach((taskId) => resolvedTaskIdsRef.current.add(taskId))
+    creditedPaymentIdsFromLedger(demoLedgerRows).forEach((orderId) => creditedPaymentIdsRef.current.add(orderId))
+  }, [demoLedgerRows])
 
   useEffect(() => {
     const handleHistoryChange = () => {
@@ -654,6 +668,29 @@ export function usePrototypeStore() {
     })
   }
 
+  const renameTask = (taskId: string, nextTitle: string) => {
+    const result = renameCompletedTaskState(demoTasks, demoAssets, taskId, nextTitle)
+    if (!result.task) return
+
+    setDemoTasks(result.tasks)
+    setDemoAssets(result.assets)
+    setToast({ title: '作品名称已更新', text: `已重命名为“${result.task.title}”。` })
+  }
+
+  const deleteTask = (taskId: string) => {
+    const result = deleteCompletedTaskState(demoTasks, demoAssets, taskId)
+    if (!result.task) return
+
+    setDemoTasks(result.tasks)
+    setDemoAssets(result.assets)
+    setUnseenCompletedTaskIds((current) => current.filter((id) => id !== taskId))
+    if (selectedTaskId === taskId) {
+      setOverlay(null)
+      setSelectedTaskId(result.tasks[0]?.id ?? '')
+    }
+    setToast({ title: '作品已删除', text: '作品文件已从作品库移除，积分记录仍会保留。' })
+  }
+
   const openAssetLibrary = () => {
     setOverlay(null)
     setWorksSection('assets')
@@ -746,10 +783,13 @@ export function usePrototypeStore() {
     const newTask: Task = {
       id: `T-IMAGE-${String(demoTasks.length + 1).padStart(3, '0')}`,
       title: `${selectedStudioTemplate.title} · ${selectedAsset.name}`,
+      templateTitle: selectedStudioTemplate.title,
       status: 'queued',
       progress: 8,
       cost: totalCost,
       updated: '刚刚',
+      createdAt: new Date().toISOString(),
+      sourceAssetName: selectedAsset.name,
       image: selectedAsset.image,
       params: {
         templateId: selectedStudioTemplate.id,
@@ -785,38 +825,23 @@ export function usePrototypeStore() {
   }
 
   const completeTask = useCallback((task: Task) => {
+    if (!claimIdOnce(resolvedTaskIdsRef.current, task.id)) return
+
+    const completedAt = task.completedAt ?? new Date().toISOString()
+    const completedTask = completeTaskState(task, completedAt, videoPreviewSrc)
+    const settlementRow = taskSettlementLedgerRow(completedTask)
+    const generatedAsset = generatedAssetForTask(completedTask, videoPreviewSrc)
+
+    setDemoTasks((current) => current.map((item) => (item.id === task.id ? completedTask : item)))
     setUnseenCompletedTaskIds((current) => current.includes(task.id) ? current : [...current, task.id])
     setFrozenCredits((current) => Math.max(0, current - task.cost))
     setDemoLedgerRows((current) => [
-      {
-        id: `L-${task.id}-SETTLE`,
-        title: task.title,
-        amount: `-${task.cost}`,
-        source: '视频生成',
-        kind: 'settlement',
-        status: 'settled',
-        refId: task.id,
-        time: '刚刚',
-        note: '视频已生成并保存到素材。',
-      },
+      settlementRow,
       ...current.filter((row) => row.refId !== task.id),
     ])
     setDemoAssets((current) => {
       if (current.some((asset) => asset.source === task.id)) return current
-      return [
-        {
-          id: `A-OUT-${task.id}`,
-          name: generatedOutputName(task),
-          type: '生成视频',
-          kind: 'video',
-          image: task.image,
-          videoSrc: videoPreviewSrc,
-          expires: '30 天后过期',
-          status: 'library',
-          source: task.id,
-        },
-        ...current,
-      ]
+      return [generatedAsset, ...current]
     })
     setToast({ title: '视频已完成', text: `${task.title} 已保存到作品库。` })
   }, [])
@@ -844,40 +869,17 @@ export function usePrototypeStore() {
   const refundTask = (taskId: string) => {
     const task = demoTasks.find((item) => item.id === taskId)
     if (!task || !activeStatuses.includes(task.status)) return
+    if (!claimIdOnce(resolvedTaskIdsRef.current, task.id)) return
 
+    const refundedTask = refundTaskState(task, new Date().toISOString())
+    const releaseRow = taskReleaseLedgerRow(refundedTask)
     setDemoTasks((current) =>
-      current.map((item) =>
-        item.id === taskId
-          ? {
-              ...item,
-              status: 'refunded',
-              progress: 100,
-              updated: '刚刚',
-              failure: {
-                reason: 'timeout',
-                stage: 'provider',
-                code: 'TASK_TIMEOUT_RELEASED',
-                retryable: true,
-                message: '生成超时，积分已经退回。',
-              },
-            }
-          : item,
-      ),
+      current.map((item) => (item.id === taskId ? refundedTask : item)),
     )
     setFrozenCredits((current) => Math.max(0, current - task.cost))
     setCreditBalance((current) => current + task.cost)
     setDemoLedgerRows((current) => [
-      {
-        id: `L-${task.id}-RELEASE`,
-        title: task.title,
-        amount: `+${task.cost}`,
-        source: '自动退回',
-        kind: 'release',
-        status: 'released',
-        refId: task.id,
-        time: '刚刚',
-        note: '本次未生成成功，积分已经退回。',
-      },
+      releaseRow,
       ...current.filter((row) => row.refId !== task.id),
     ])
     setToast({ title: '积分已退回', text: `${task.cost} 积分已回到余额。` })
@@ -901,6 +903,18 @@ export function usePrototypeStore() {
     setToast({ title: '支付订单已创建', text: `${pack.name} 等待支付确认。` })
   }
 
+  const creditPaymentOrder = useCallback((order: PaymentOrder) => {
+    if (!claimIdOnce(creditedPaymentIdsRef.current, order.id)) return false
+
+    const rechargeRow = paymentRechargeLedgerRow(order)
+    setCreditBalance((current) => current + order.credits)
+    setDemoLedgerRows((current) => [
+      rechargeRow,
+      ...current.filter((row) => row.id !== rechargeRow.id),
+    ])
+    return true
+  }, [])
+
   const resolvePaymentOrder = (status: Extract<PaymentOrderStatus, 'paid' | 'failed' | 'cancelled' | 'expired'>) => {
     setPaymentOrder((current) => ({
       ...current,
@@ -908,19 +922,10 @@ export function usePrototypeStore() {
       note: status === 'paid' ? '充值成功，积分已到账。' : current.note,
     }))
     if (status === 'paid') {
-      setCreditBalance((current) => current + paymentOrder.credits)
-      addLedgerRow({
-        id: `L-${paymentOrder.id}-RECHARGE`,
-        title: `${paymentOrder.packageName} 充值到账`,
-        amount: `+${paymentOrder.credits}`,
-        source: paymentOrder.id,
-        kind: 'recharge',
-        status: 'credited',
-        refId: paymentOrder.id,
-        time: '刚刚',
-        note: '充值成功，积分已加入余额。',
-      })
-      setToast({ title: '积分已到账', text: `${paymentOrder.credits} 积分已写入账户。` })
+      const credited = creditPaymentOrder(paymentOrder)
+      setToast(credited
+        ? { title: '积分已到账', text: `${paymentOrder.credits} 积分已写入账户。` }
+        : { title: '订单已处理', text: '该订单的积分已经到账，无需重复操作。' })
       return
     }
     const copy = status === 'cancelled' ? '订单已取消，余额不变。' : status === 'expired' ? '订单已过期，余额不变。' : '支付未完成，余额不变。'
@@ -977,25 +982,12 @@ export function usePrototypeStore() {
     if (aigcApiConfig.mode !== 'prototype' || paymentOrder.status !== 'pending') return
     const timer = window.setTimeout(() => {
       setPaymentOrder((current) => ({ ...current, status: 'paid', note: '充值成功，积分已到账。' }))
-      setCreditBalance((current) => current + paymentOrder.credits)
-      setDemoLedgerRows((current) => [
-        {
-          id: `L-${paymentOrder.id}-RECHARGE`,
-          title: `${paymentOrder.packageName} 充值`,
-          amount: `+${paymentOrder.credits}`,
-          source: '充值',
-          kind: 'recharge',
-          status: 'credited',
-          refId: paymentOrder.id,
-          time: '刚刚',
-          note: '充值成功，积分已加入余额。',
-        },
-        ...current.filter((row) => row.id !== `L-${paymentOrder.id}-RECHARGE`),
-      ])
-      setToast({ title: '积分已到账', text: `${paymentOrder.credits} 积分已加入余额。` })
+      if (creditPaymentOrder(paymentOrder)) {
+        setToast({ title: '积分已到账', text: `${paymentOrder.credits} 积分已加入余额。` })
+      }
     }, 1800)
     return () => window.clearTimeout(timer)
-  }, [paymentOrder])
+  }, [creditPaymentOrder, paymentOrder])
 
   useEffect(() => {
     if (aigcApiConfig.mode !== 'prototype' || qrLoginSession.status !== 'scanned') return
@@ -1067,6 +1059,7 @@ export function usePrototypeStore() {
     createAssetCategory,
     createPaymentOrder,
     deleteAssetCategory,
+    deleteTask,
     downloadAsset,
     downloadTaskResult,
     goToView,
@@ -1085,6 +1078,7 @@ export function usePrototypeStore() {
     refreshQrLoginSession,
     refundTask,
     renameAsset,
+    renameTask,
     resumeStudioDraft,
     resolvePaymentOrder,
     restoreAsset,

@@ -13,7 +13,7 @@ import {
 import { activeStatuses } from '../prototypeData'
 import { generatedOutputName } from '../domain'
 import type { Task, TaskStatus } from '../types'
-import { taskStatusCopy } from '../viewModels'
+import { formatWorkDateOnly, formatWorkExactDate, taskStatusCopy } from '../viewModels'
 
 type TaskDetailProps = {
   task: Task
@@ -77,6 +77,29 @@ export function TaskDetail({
         { label: '输出分辨率', value: '-' },
         { label: '画质', value: '-' },
       ]
+  const primaryDate = isSuccess
+    ? `${formatWorkExactDate(task.completedAt)} 完成`
+    : isRefunded
+      ? `${formatWorkExactDate(task.failedAt)} 未完成`
+      : `${formatWorkExactDate(task.createdAt)} 提交`
+  const workInfoRows = [
+    { label: '提交时间', value: formatWorkExactDate(task.createdAt) },
+    ...(isSuccess ? [{ label: '完成时间', value: formatWorkExactDate(task.completedAt) }] : []),
+    { label: '使用模板', value: task.templateTitle },
+    { label: '原始素材', value: task.sourceAssetName ?? '素材名称待确认' },
+    { label: '作品编号', value: task.id },
+    ...(isSuccess
+      ? [
+          { label: '文件信息', value: `${task.output?.format ?? 'MP4'} · ${task.output?.size ?? '大小待确认'}` },
+          {
+            label: '保存期限',
+            value: task.output?.expiresAt
+              ? `${formatWorkDateOnly(task.output.expiresAt)} 到期`
+              : task.output?.retentionLabel ?? '永久保存',
+          },
+        ]
+      : []),
+  ]
 
   return (
     <div className="drawer-stack">
@@ -88,7 +111,7 @@ export function TaskDetail({
             {status.label}
           </em>
           <h2>{task.title}</h2>
-          <span>{task.cost} 积分 · {task.updated}</span>
+          <span>{primaryDate}</span>
         </div>
       </section>
       {isActive && (
@@ -108,7 +131,12 @@ export function TaskDetail({
           <div>
             <p className="eyebrow">作品已生成</p>
             <strong>{generatedOutputName(task)}</strong>
-            <small>已使用 {task.cost} 积分 · 保存 30 天</small>
+            <div className="task-result-meta">
+              <span>{task.params?.duration ?? '时长待确认'}</span>
+              <span>{task.params?.ratio ?? '比例待确认'}</span>
+              <span>{task.params?.resolution ?? '分辨率待确认'}</span>
+            </div>
+            <small>已使用 {task.cost} 积分 · {task.output?.retentionLabel ?? '保存期限待确认'}</small>
             <div className="result-action-row">
               <button type="button" className="secondary-action" onClick={onDownload}>
                 <Download size={17} />
@@ -142,6 +170,19 @@ export function TaskDetail({
           </span>
         </section>
       )}
+      <section className="task-param-panel task-work-info-panel">
+        <header>
+          <strong>{isSuccess ? '作品信息' : '生成记录'}</strong>
+        </header>
+        <div className="task-param-grid task-work-info-grid">
+          {workInfoRows.map((row) => (
+            <span key={row.label}>
+              <small>{row.label}</small>
+              <strong title={row.value}>{row.value}</strong>
+            </span>
+          ))}
+        </div>
+      </section>
       <section className="task-param-panel">
         <header>
           <strong>生成设置</strong>

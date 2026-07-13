@@ -140,10 +140,13 @@ export function createPrototypeAigcApiClient(): AigcApiClient {
           toTaskDto({
             id: `T-PROTOTYPE-${Date.now()}`,
             title: `${request.templateId} 生成任务`,
+            templateTitle: templates.find((template) => template.id === request.templateId)?.title ?? request.templateId,
             status: 'queued',
             progress: 8,
             cost: templates.find((template) => template.id === request.templateId)?.cost ?? 0,
             updated: '刚刚',
+            createdAt: nowIso(),
+            sourceAssetName: initialAssets.find((asset) => asset.id === request.inputAssetIds[0])?.name,
             image: initialAssets[0]?.image ?? templates[0].image,
             params: {
               ...request.outputSettings,
@@ -253,12 +256,18 @@ function toTaskDto(task: Task): GenerationTaskDto {
   return {
     id: task.id,
     title: task.title,
+    templateTitle: task.templateTitle,
     status: task.status,
     progress: task.progress,
     cost: task.cost,
+    createdAt: task.createdAt,
+    completedAt: task.completedAt,
+    failedAt: task.failedAt,
+    sourceAssetName: task.sourceAssetName,
     updatedAt: relativeLabelToIso(task.updated),
     image: task.image,
     videoSrc: task.videoSrc,
+    output: task.output,
     params: {
       templateId: task.params?.templateId ?? 'unknown-template',
       templateVersion: task.params?.templateVersion ?? 'unknown@v1',

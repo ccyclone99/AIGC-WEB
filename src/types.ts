@@ -68,6 +68,13 @@ export type OutputSettings = {
   quality: string
 }
 
+export type TemplateExampleMedia = {
+  label: string
+  kind: 'image' | 'video'
+  image: string
+  videoSrc?: string
+}
+
 export type Template = {
   id: string
   title: string
@@ -81,18 +88,33 @@ export type Template = {
   accent: string
   tags: string[]
   description: string
+  example: {
+    input: TemplateExampleMedia
+    output: TemplateExampleMedia
+  }
   config: TemplateConfig
 }
 
 export type Task = {
   id: string
   title: string
+  templateTitle: string
   status: TaskStatus
   progress: number
   cost: number
   updated: string
+  createdAt: string
+  completedAt?: string
+  failedAt?: string
+  sourceAssetName?: string
   image: string
   videoSrc?: string
+  output?: {
+    format: string
+    size: string
+    expiresAt?: string
+    retentionLabel: string
+  }
   failure?: TaskFailure
   params?: OutputSettings & {
     templateId: string

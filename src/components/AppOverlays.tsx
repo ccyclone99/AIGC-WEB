@@ -140,7 +140,7 @@ export function AppOverlays({
         </Modal>
       )}
       {overlay === 'task' && (
-        <Drawer title="生成详情" onClose={onCloseOverlay}>
+        <Drawer title={selectedTask.status === 'success' ? '作品详情' : '生成详情'} onClose={onCloseOverlay}>
           <TaskDetail
             task={selectedTask}
             onDownload={() => onDownloadTask(selectedTask.id)}

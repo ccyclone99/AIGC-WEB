@@ -163,12 +163,23 @@ export type CreateGenerationTaskRequest = {
 export type GenerationTaskDto = {
   id: string
   title: string
+  templateTitle?: string
   status: TaskStatus
   progress: number
   cost: number
+  createdAt?: string
+  completedAt?: string
+  failedAt?: string
+  sourceAssetName?: string
   updatedAt: string
   image: string
   videoSrc?: string
+  output?: {
+    format: string
+    size: string
+    expiresAt?: string
+    retentionLabel: string
+  }
   params: CreateGenerationTaskRequest
   failure?: TaskFailure
   ledgerIds: string[]

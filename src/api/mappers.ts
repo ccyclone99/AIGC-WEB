@@ -61,12 +61,18 @@ export function mapGenerationTaskDto(dto: GenerationTaskDto): Task {
   return {
     id: dto.id,
     title: dto.title,
+    templateTitle: dto.templateTitle ?? dto.title,
     status: dto.status,
     progress: dto.progress,
     cost: dto.cost,
+    createdAt: dto.createdAt ?? dto.updatedAt,
+    completedAt: dto.completedAt,
+    failedAt: dto.failedAt,
+    sourceAssetName: dto.sourceAssetName,
     updated: formatRelativeTime(dto.updatedAt),
     image: dto.image,
     videoSrc: dto.videoSrc,
+    output: dto.output,
     failure: dto.failure,
     params: {
       ...dto.params.outputSettings,

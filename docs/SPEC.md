@@ -1,7 +1,7 @@
 # AIGC Web SPEC
 
-Status: Draft, frontend prototype baseline updated
-Last updated: 2026-07-10
+Status: Frontend v0.1.0 baseline implemented; production backend pending
+Last updated: 2026-07-13
 
 ## 1. Overview
 

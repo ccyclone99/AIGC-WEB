@@ -4,13 +4,14 @@ import {
   ChevronRight,
   Clock3,
   Coins,
+  Eye,
   FileVideo,
   ImagePlus,
   PackageCheck,
-  Play,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Trash2,
   Upload,
   Wallet,
   WandSparkles,
@@ -23,7 +24,7 @@ import {
   sameOutputSettings,
   userEditableOutputFieldsForTemplate,
 } from '../domain'
-import { activeStatuses, outputOptionGroups } from '../prototypeData'
+import { activeStatuses, outputOptionGroups, videoPreviewSrc } from '../prototypeData'
 import type { Asset, OutputSettingKey, OutputSettings, PreviewMedia, Task, Template } from '../types'
 
 type StudioPageProps = {
@@ -64,15 +65,29 @@ export function StudioPage({
     : undefined
   const isPortraitTemplate = template.config.workflowType === 'portrait-to-video'
   const inputNoun = isPortraitTemplate ? '人像照片' : '商品图'
-  const creationTitle = isPortraitTemplate ? '人像写真制作' : '商品视频制作'
+  const creationTitle = template.title
   const creationSubtitle = isPortraitTemplate
-    ? '选择一张已获授权的人像照片，确认授权后提交生成。'
-    : '上传一张商品图，确认后即可提交生成。'
+    ? '左侧查看模板案例，右侧选择已获授权的人像照片。'
+    : '左侧查看模板案例，右侧选择本次使用的商品图。'
   const totalCost = template.cost
   const hasSelectedAsset = Boolean(selectedAsset?.image)
   const hasEnoughCredits = creditBalance >= totalCost
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [exampleStage, setExampleStage] = useState<'input' | 'output'>('output')
   const [portraitConsentConfirmed, setPortraitConsentConfirmed] = useState(false)
+  const exampleMedia = template.example?.[exampleStage] ?? (exampleStage === 'input'
+    ? {
+        label: template.config.workflowType === 'video-remix' ? '示例原视频' : '示例上传图片',
+        kind: template.config.workflowType === 'video-remix' ? 'video' as const : 'image' as const,
+        image: template.image,
+        videoSrc: template.config.workflowType === 'video-remix' ? template.videoSrc : undefined,
+      }
+    : {
+        label: '模板完成效果',
+        kind: 'video' as const,
+        image: template.image,
+        videoSrc: videoPreviewSrc,
+      })
   const requiresPortraitConsent = template.config.workflowType === 'portrait-to-video'
   const hasRequiredConsent = !requiresPortraitConsent || portraitConsentConfirmed
   const currentIdempotencyKey = selectedAsset ? generationIdempotencyKey(template, selectedAsset, outputSettings) : ''
@@ -116,6 +131,7 @@ export function StudioPage({
 
   useEffect(() => {
     setPortraitConsentConfirmed(false)
+    setExampleStage('output')
   }, [template.id])
 
   const handleSubmit = () => {
@@ -128,19 +144,20 @@ export function StudioPage({
 
   return (
     <div className="studio-page-v3 make-simple-page make-console-page">
-      <section className="make-simple-card make-console-card" style={{ '--template-accent': template.accent } as CSSProperties}>
+      <section className="make-simple-card make-console-card studio-editor-card" style={{ '--template-accent': template.accent } as CSSProperties}>
         <header className="make-simple-head make-console-head studio-editor-head">
           <div className="make-console-title">
+            <p className="eyebrow">视频制作</p>
             <h1>{creationTitle}</h1>
             <span>{creationSubtitle}</span>
           </div>
           <button type="button" className="make-template-chip" onClick={onChangeTemplate} title="更换模板">
             <PackageCheck size={17} />
             <span>
-              <small>模板</small>
-              <strong>{template.title}</strong>
+              <small>当前模板</small>
+              <strong>{outputSettings.duration} · {outputSettings.ratio}</strong>
             </span>
-            <em>更换 <ChevronRight size={14} /></em>
+            <em>更换模板 <ChevronRight size={14} /></em>
           </button>
         </header>
 
@@ -149,70 +166,110 @@ export function StudioPage({
             <div className="studio-stage-topline">
               <span>
                 <Sparkles size={16} />
-                视频画面预览
+                模板效果示例
               </span>
-              <em>{outputSettings.duration} · {outputSettings.ratio}</em>
+              <em>案例展示</em>
             </div>
-            {selectedAsset ? (
-              <button type="button" className="image-upload-card studio-stage-card" onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}>
-                <img src={selectedAsset.image} alt={`${selectedAsset.name} 当前${inputNoun}`} />
+            <div className="studio-example-switch" role="group" aria-label="切换模板案例画面">
+              <button
+                type="button"
+                className={exampleStage === 'input' ? 'is-active' : ''}
+                aria-pressed={exampleStage === 'input'}
+                onClick={() => setExampleStage('input')}
+              >
+                示例素材
+              </button>
+              <button
+                type="button"
+                className={exampleStage === 'output' ? 'is-active' : ''}
+                aria-pressed={exampleStage === 'output'}
+                onClick={() => setExampleStage('output')}
+              >
+                完成效果
+              </button>
+            </div>
+            <div className="studio-stage-canvas">
+              <div className={`image-upload-card studio-stage-card studio-example-media is-ratio-${outputSettings.ratio.replace(':', '-')}`}>
+                {exampleMedia.kind === 'video' && exampleMedia.videoSrc ? (
+                  <video
+                    src={exampleMedia.videoSrc}
+                    poster={exampleMedia.image}
+                    controls
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    aria-label={exampleMedia.label}
+                  />
+                ) : (
+                  <img src={exampleMedia.image} alt={exampleMedia.label} />
+                )}
                 <span className="studio-stage-badge">
-                  <FileVideo size={15} />
-                  输出 {outputSettings.duration} 视频
+                  {exampleMedia.kind === 'video' ? <FileVideo size={15} /> : <ImagePlus size={15} />}
+                  {exampleMedia.label}
                 </span>
                 <span className="studio-stage-ratio">{outputSettings.ratio}</span>
-              </button>
-            ) : (
-              <button type="button" className="image-upload-card image-upload-empty studio-stage-card" onClick={onOpenAssetPicker}>
-                <img src={template.image} alt="" />
-                <span className="image-upload-empty-content">
-                  <ImagePlus size={34} />
-                  <strong>选择{inputNoun}</strong>
-                  <span>使用“{template.title}”生成视频</span>
-                </span>
-              </button>
-            )}
+              </div>
+            </div>
+            <p className="studio-stage-note">
+              <span>{exampleMedia.label}</span>
+              <em>模板案例，与本次上传素材无关</em>
+            </p>
           </section>
 
           <section className="make-form-panel image-only-copy make-control-panel studio-control-tower">
             <div className="make-control-section make-asset-panel">
-              <div className="make-panel-heading">
+              <div className="studio-step-heading">
+                <b>1</b>
                 <span>
-                  <p className="eyebrow">输入素材</p>
-                  <h2>{selectedAsset?.name ?? `等待选择${inputNoun}`}</h2>
+                  <strong>选择{inputNoun}</strong>
+                  <small>使用清晰、主体完整的图片效果更好</small>
                 </span>
-                {!selectedAsset && <em className="is-waiting">未选择</em>}
               </div>
-              <div className="make-upload-actions make-console-actions">
-                <button type="button" className="secondary-action upload-inline-button make-replace-action" onClick={onOpenAssetPicker}>
-                  <Upload size={18} />
-                  {selectedAsset ? `替换${inputNoun}` : `选择${inputNoun}`}
-                </button>
-                {selectedAsset && (
-                  <>
+              {selectedAsset ? (
+                <>
+                  <div className="studio-material-card">
+                    <img src={selectedAsset.image} alt="" />
+                    <span>
+                      <small>已选择</small>
+                      <strong>{selectedAsset.name}</strong>
+                    </span>
                     <button
                       type="button"
-                      className="secondary-action make-icon-action"
-                      title="预览图片"
-                      aria-label="预览图片"
+                      className="studio-material-replace"
+                      onClick={onOpenAssetPicker}
+                    >
+                      <Upload size={16} />
+                      替换
+                    </button>
+                  </div>
+                  <div className="studio-material-tools">
+                    <button
+                      type="button"
                       onClick={() => onPreview(selectedAsset.name, selectedAsset.image)}
                     >
-                      <Play size={18} />
-                      预览图片
+                      <Eye size={16} />
+                      查看大图
                     </button>
                     <button
                       type="button"
-                      className="secondary-action make-icon-action"
-                      title="移除图片"
-                      aria-label="移除图片"
                       onClick={() => onAssetSelect('')}
                     >
-                      <X size={18} />
-                      移除图片
+                      <Trash2 size={16} />
+                      移除
                     </button>
-                  </>
-                )}
-              </div>
+                  </div>
+                </>
+              ) : (
+                <button type="button" className="studio-material-empty" onClick={onOpenAssetPicker}>
+                  <ImagePlus size={22} />
+                  <span>
+                    <strong>选择{inputNoun}</strong>
+                    <small>支持从素材库选择或上传新图片</small>
+                  </span>
+                  <ChevronRight size={17} />
+                </button>
+              )}
             </div>
 
             {editableOutputGroups.length > 0 && <section className="make-settings-shell">
@@ -292,14 +349,25 @@ export function StudioPage({
               </label>
             )}
 
-            <section className="make-submit-panel">
-              <div className="make-submit-copy">
+            <section className="make-submit-panel studio-generate-panel">
+              <div className="studio-step-heading">
+                <b>2</b>
                 <span>
-                  <Coins size={17} />
+                  <strong>生成视频</strong>
+                  <small>确认规格与消耗后提交</small>
+                </span>
+              </div>
+              <div className="studio-output-summary" aria-label={`输出规格：${settingSummary}`}>
+                <span>{outputSettings.ratio} 竖屏</span>
+                <span>{outputSettings.duration}</span>
+                <span>{outputSettings.resolution}</span>
+              </div>
+              <div className="studio-cost-row">
+                <span>
+                  <Coins size={16} />
                   预计消耗
                 </span>
                 <strong>{totalCost} 积分</strong>
-                <p>{submitHint}</p>
               </div>
               <button
                 type="button"
@@ -310,6 +378,7 @@ export function StudioPage({
                 <SubmitIcon size={18} />
                 {submitLabel}
               </button>
+              <p className="studio-submit-hint">{submitHint}</p>
             </section>
 
           </section>

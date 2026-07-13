@@ -1,20 +1,31 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import {
   AlertTriangle,
+  Check,
   CheckCircle2,
   ChevronRight,
   Clock3,
   Download,
   FileVideo,
   Images,
+  MoreHorizontal,
+  Pencil,
   Play,
   RefreshCcw,
   Sparkles,
+  Trash2,
+  X,
 } from 'lucide-react'
 
 import { activeStatuses } from '../prototypeData'
 import type { Asset, AssetFilter, PreviewMedia, Task, TaskStatus, UploadReceipt, WorksSection } from '../types'
-import { filterTasksForWorks, taskStatusCopy, worksTaskCounts, type WorkTaskFilter } from '../viewModels'
+import {
+  filterTasksForWorks,
+  formatWorkCardDate,
+  taskStatusCopy,
+  worksTaskCounts,
+  type WorkTaskFilter,
+} from '../viewModels'
 import { AssetManager } from './AssetManager'
 
 type WorksViewProps = {
@@ -27,6 +38,8 @@ type WorksViewProps = {
   onSectionChange: (section: WorksSection) => void
   onOpenTask: (taskId: string) => void
   onDownloadTask: (taskId: string) => void
+  onDeleteTask: (taskId: string) => void
+  onRenameTask: (taskId: string, title: string) => void
   onReuseTask: (taskId: string) => void
   onArchiveAsset: (assetId: string) => void
   onCancelUpload: () => void
@@ -61,6 +74,8 @@ export function WorksView({
   onSectionChange,
   onOpenTask,
   onDownloadTask,
+  onDeleteTask,
+  onRenameTask,
   onReuseTask,
   onArchiveAsset,
   onCancelUpload,
@@ -78,14 +93,31 @@ export function WorksView({
   const [taskFilter, setTaskFilter] = useState<WorkTaskFilter>(() =>
     window.location.hash.includes('status=active') ? 'active' : 'recent',
   )
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [renameDraft, setRenameDraft] = useState('')
+  const [deleteConfirmTaskId, setDeleteConfirmTaskId] = useState<string | null>(null)
   const counts = worksTaskCounts(tasks)
   const visibleTasks = filterTasksForWorks(tasks, taskFilter)
   const uploadAssets = assets.filter((asset) => asset.type !== '生成视频')
   const filters: Array<{ id: WorkTaskFilter; label: string; count: number }> = [
     { id: 'recent', label: '近期', count: counts.recent },
+    { id: 'success', label: '已完成', count: counts.success },
     { id: 'active', label: '生成中', count: counts.active },
     { id: 'refunded', label: '需处理', count: counts.refunded },
   ]
+
+  const startRenaming = (task: Task) => {
+    setEditingTaskId(task.id)
+    setRenameDraft(task.title)
+    setDeleteConfirmTaskId(null)
+  }
+
+  const submitRename = (event: FormEvent, taskId: string) => {
+    event.preventDefault()
+    if (!renameDraft.trim()) return
+    onRenameTask(taskId, renameDraft)
+    setEditingTaskId(null)
+  }
 
   return (
     <div className="works-page">
@@ -146,6 +178,35 @@ export function WorksView({
 
                 return (
                   <article className={`work-card work-status-${task.status}`} key={task.id}>
+                    {success && (
+                      <details className="work-card-menu">
+                        <summary aria-label={`管理作品：${task.title}`}>
+                          <MoreHorizontal size={17} />
+                        </summary>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              startRenaming(task)
+                              event.currentTarget.closest('details')?.removeAttribute('open')
+                            }}
+                          >
+                            <Pencil size={15} /> 重命名
+                          </button>
+                          <button
+                            type="button"
+                            className="is-danger"
+                            onClick={(event) => {
+                              setDeleteConfirmTaskId(task.id)
+                              setEditingTaskId(null)
+                              event.currentTarget.closest('details')?.removeAttribute('open')
+                            }}
+                          >
+                            <Trash2 size={15} /> 删除作品
+                          </button>
+                        </div>
+                      </details>
+                    )}
                     <button
                       type="button"
                       className="work-card-media"
@@ -161,8 +222,38 @@ export function WorksView({
                         <StatusIcon size={14} />
                         {status.label}
                       </span>
-                      <strong>{task.title}</strong>
-                      <small>{task.updated}</small>
+                      {editingTaskId === task.id ? (
+                        <form className="work-title-editor" onSubmit={(event) => submitRename(event, task.id)}>
+                          <input
+                            type="text"
+                            value={renameDraft}
+                            maxLength={40}
+                            aria-label="作品名称"
+                            onChange={(event) => setRenameDraft(event.currentTarget.value)}
+                            autoFocus
+                          />
+                          <button type="submit" aria-label="保存作品名称" disabled={!renameDraft.trim()}>
+                            <Check size={15} />
+                          </button>
+                          <button type="button" aria-label="取消重命名" onClick={() => setEditingTaskId(null)}>
+                            <X size={15} />
+                          </button>
+                        </form>
+                      ) : (
+                        <strong>{task.title}</strong>
+                      )}
+                      {success ? (
+                        <>
+                          <small className="work-completed-date">{formatWorkCardDate(task.completedAt)} 完成</small>
+                          <span className="work-output-spec">
+                            <em>{task.params?.duration ?? '时长待确认'}</em>
+                            <em>{task.params?.ratio ?? '比例待确认'}</em>
+                            <em>{task.params?.resolution ?? '分辨率待确认'}</em>
+                          </span>
+                        </>
+                      ) : (
+                        <small>{task.updated}</small>
+                      )}
                       {active && (
                         <div className="work-progress" aria-label={`${task.progress}%`}>
                           <span style={{ width: `${task.progress}%` }} />
@@ -173,7 +264,27 @@ export function WorksView({
                         <p>{task.failure?.message ?? '本次没有生成成功，积分已退回。'}</p>
                       )}
                     </div>
-                    <div className="work-card-actions">
+                    {deleteConfirmTaskId === task.id ? (
+                      <div className="work-delete-confirm">
+                        <span>
+                          <strong>确定删除这件作品？</strong>
+                          <small>删除后无法恢复，积分记录仍会保留。</small>
+                        </span>
+                        <div>
+                          <button type="button" onClick={() => setDeleteConfirmTaskId(null)}>取消</button>
+                          <button
+                            type="button"
+                            className="is-danger"
+                            onClick={() => {
+                              onDeleteTask(task.id)
+                              setDeleteConfirmTaskId(null)
+                            }}
+                          >
+                            删除
+                          </button>
+                        </div>
+                      </div>
+                    ) : <div className="work-card-actions">
                       {active && (
                         <button type="button" className="work-main-action" onClick={() => onOpenTask(task.id)}>
                           查看进度 <ChevronRight size={15} />
@@ -181,6 +292,9 @@ export function WorksView({
                       )}
                       {success && (
                         <>
+                          <button type="button" onClick={() => onOpenTask(task.id)}>
+                            详情
+                          </button>
                           <button type="button" onClick={() => onDownloadTask(task.id)}>
                             <Download size={15} /> 下载
                           </button>
@@ -199,7 +313,7 @@ export function WorksView({
                           )}
                         </>
                       )}
-                    </div>
+                    </div>}
                   </article>
                 )
               })}

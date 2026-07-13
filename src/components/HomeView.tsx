@@ -49,7 +49,7 @@ export function HomeView({
           <div className="home-demo-bar">
             <span>
               <FileVideo size={15} />
-              8 秒商品视频
+              {primaryTemplate.duration} 商品视频
             </span>
             <em>{primaryTemplate.ratio} · 1080p · {primaryTemplate.duration}</em>
           </div>

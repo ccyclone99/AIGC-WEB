@@ -90,7 +90,7 @@ const sourceVideoInput: TemplateInputField = {
   help: '视频模板会进入独立制作台，当前仅开放模板预览。',
 }
 
-export const templates: Template[] = [
+const templateSeeds: Array<Omit<Template, 'example'>> = [
   {
     id: 'watch',
     title: '精品表款 8 秒转场',
@@ -285,14 +285,39 @@ export const templates: Template[] = [
   },
 ]
 
+export const templates: Template[] = templateSeeds.map((template) => {
+  const inputIsVideo = template.config.workflowType === 'video-remix'
+
+  return {
+    ...template,
+    example: {
+      input: {
+        label: inputIsVideo ? '示例原视频' : '示例上传图片',
+        kind: inputIsVideo ? 'video' : 'image',
+        image: template.image,
+        videoSrc: inputIsVideo ? template.videoSrc : undefined,
+      },
+      output: {
+        label: '模板完成效果',
+        kind: 'video',
+        image: template.image,
+        videoSrc: videoPreviewSrc,
+      },
+    },
+  }
+})
+
 export const initialTasks: Task[] = [
   {
     id: 'T-240625-019',
     title: '潮鞋爆款节奏',
+    templateTitle: '潮鞋爆款节奏',
     status: 'rendering',
     progress: 72,
     cost: 138,
     updated: '2 分钟前',
+    createdAt: '2026-07-13T18:36:00+08:00',
+    sourceAssetName: '红色运动鞋主图.jpg',
     image: templates[1].image,
     params: {
       templateId: 'sneaker',
@@ -310,12 +335,22 @@ export const initialTasks: Task[] = [
   {
     id: 'T-240625-018',
     title: '精品表款 8 秒转场',
+    templateTitle: '精品表款 8 秒转场',
     status: 'success',
     progress: 100,
     cost: 168,
     updated: '18 分钟前',
+    createdAt: '2026-07-13T18:12:00+08:00',
+    completedAt: '2026-07-13T18:20:00+08:00',
+    sourceAssetName: '白色腕表主图.jpg',
     image: templates[0].image,
     videoSrc: videoPreviewSrc,
+    output: {
+      format: 'MP4',
+      size: '18.6 MB',
+      expiresAt: '2026-08-12T18:20:00+08:00',
+      retentionLabel: '保存 30 天',
+    },
     params: {
       templateId: 'watch',
       templateVersion: 'watch@v1',
@@ -323,7 +358,7 @@ export const initialTasks: Task[] = [
       workflowType: 'image-to-video',
       imageId: 'A-WATCH-MAIN',
       idempotencyKey: 'gen:watch@v1:A-WATCH-MAIN:1-1:8s:1080p:hd',
-      ratio: '1:1',
+      ratio: '9:16',
       duration: '8s',
       resolution: '1080p',
       quality: '高清',
@@ -332,10 +367,14 @@ export const initialTasks: Task[] = [
   {
     id: 'T-240625-017',
     title: '美妆成分展示',
+    templateTitle: '美妆成分展示',
     status: 'refunded',
     progress: 100,
     cost: 198,
     updated: '42 分钟前',
+    createdAt: '2026-07-13T17:48:00+08:00',
+    failedAt: '2026-07-13T17:56:00+08:00',
+    sourceAssetName: '精华液主图.jpg',
     image: templates[2].image,
     failure: {
       reason: 'provider_error',
@@ -360,10 +399,14 @@ export const initialTasks: Task[] = [
   {
     id: 'T-240625-016',
     title: '包袋细节巡游',
+    templateTitle: '包袋细节巡游',
     status: 'refunded',
     progress: 100,
     cost: 176,
     updated: '1 小时前',
+    createdAt: '2026-07-13T17:06:00+08:00',
+    failedAt: '2026-07-13T17:14:00+08:00',
+    sourceAssetName: '黑色通勤包主图.jpg',
     image: templates[4].image,
     failure: {
       reason: 'moderation_block',
@@ -388,10 +431,14 @@ export const initialTasks: Task[] = [
   {
     id: 'T-240625-015',
     title: '精品表款 8 秒转场',
+    templateTitle: '精品表款 8 秒转场',
     status: 'refunded',
     progress: 100,
     cost: 168,
     updated: '2 小时前',
+    createdAt: '2026-07-13T16:12:00+08:00',
+    failedAt: '2026-07-13T16:18:00+08:00',
+    sourceAssetName: '腕表主图-模糊.jpg',
     image: templates[0].image,
     failure: {
       reason: 'asset_invalid',
