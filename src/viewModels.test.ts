@@ -37,6 +37,7 @@ describe('work date copy', () => {
 
   it('uses concise dates on cards', () => {
     expect(formatWorkCardDate('2026-07-13T18:20:00+08:00', now)).toBe('今天 18:20')
+    expect(formatWorkCardDate('2026-07-13T00:30:00+08:00', new Date('2026-07-13T00:45:00+08:00'))).toBe('今天 00:30')
     expect(formatWorkCardDate('2026-07-12T09:05:00+08:00', now)).toBe('昨天 09:05')
     expect(formatWorkCardDate('2026-06-25T16:42:00+08:00', now)).toBe('6月25日 16:42')
   })

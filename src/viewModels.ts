@@ -18,35 +18,67 @@ const validDate = (value?: string) => {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
+const workTimeZone = 'Asia/Shanghai'
+const workDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: workTimeZone,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+})
+
 const padTime = (value: number) => String(value).padStart(2, '0')
 
-const timeLabel = (date: Date) => `${padTime(date.getHours())}:${padTime(date.getMinutes())}`
+const workDateParts = (date: Date) => {
+  const parts = Object.fromEntries(
+    workDateTimeFormatter.formatToParts(date).map((part) => [part.type, part.value]),
+  )
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+  }
+}
+
+const timeLabel = (date: Date) => {
+  const parts = workDateParts(date)
+  return `${padTime(parts.hour)}:${padTime(parts.minute)}`
+}
+
+const dayNumber = ({ year, month, day }: ReturnType<typeof workDateParts>) =>
+  Date.UTC(year, month - 1, day) / 86_400_000
 
 export const formatWorkCardDate = (value?: string, now = new Date()) => {
   const date = validDate(value)
   if (!date) return '时间待确认'
 
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const dayDifference = Math.round((today.getTime() - target.getTime()) / 86_400_000)
+  const nowParts = workDateParts(now)
+  const dateParts = workDateParts(date)
+  const dayDifference = dayNumber(nowParts) - dayNumber(dateParts)
   const time = timeLabel(date)
 
   if (dayDifference === 0) return `今天 ${time}`
   if (dayDifference === 1) return `昨天 ${time}`
-  if (date.getFullYear() === now.getFullYear()) return `${date.getMonth() + 1}月${date.getDate()}日 ${time}`
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+  if (dateParts.year === nowParts.year) return `${dateParts.month}月${dateParts.day}日 ${time}`
+  return `${dateParts.year}年${dateParts.month}月${dateParts.day}日 ${time}`
 }
 
 export const formatWorkExactDate = (value?: string) => {
   const date = validDate(value)
   if (!date) return '时间待确认'
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${timeLabel(date)}`
+  const parts = workDateParts(date)
+  return `${parts.year}年${parts.month}月${parts.day}日 ${timeLabel(date)}`
 }
 
 export const formatWorkDateOnly = (value?: string) => {
   const date = validDate(value)
   if (!date) return '日期待确认'
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+  const parts = workDateParts(date)
+  return `${parts.year}年${parts.month}月${parts.day}日`
 }
 
 export const filterTasksForWorks = (tasks: Task[], filter: WorkTaskFilter) =>
